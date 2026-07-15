@@ -12,6 +12,7 @@ dist-ssr/
 *.tsbuildinfo
 .eslintcache
 next-env.d.ts
+frontend/src/routeTree.gen.ts
 
 # ---------- Cesium ----------
 frontend/public/cesium/

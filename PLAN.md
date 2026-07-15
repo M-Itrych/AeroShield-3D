@@ -8,14 +8,14 @@ Legend:
 
 ## STAGE 0 — Repo Bootstrap (Agent: `setup`)
 
-- [ ] S0.1 Create `.gitignore` (Rust target/, node_modules/, dist/, .env, cesium tokens)
-- [ ] S0.2 Create `.gitattributes` (`* text=auto eol=lf`, `*.rs text`, `*.svg binary`)
-- [ ] S0.3 Create `README.md` with project overview + run instructions
-- [ ] S0.4 Create `opencode.json` (permissions, agent definitions, task list)
-- [ ] S0.5 Scaffold `backend/` Cargo workspace skeleton (Axum, tokio, geo, moka, reqwest)
-- [ ] S0.6 Scaffold `frontend/` via Vite React-TS + install pnpm deps (tailwind, tanstack query, tanstack router, resium, cesium, shadcn init)
-- [ ] S0.7 Establish dark cyber-radar Tailwind theme tokens in `frontend/src/styles/globals.css`
-- [ ] S0.8 Initial commit `chore(repo): monorepo bootstrap` on `main`
+- [x] S0.1 Create `.gitignore` (Rust target/, node_modules/, dist/, .env, cesium tokens)
+- [x] S0.2 Create `.gitattributes` (`* text=auto eol=lf`, `*.rs text`, `*.svg binary`)
+- [x] S0.3 Create `README.md` with project overview + run instructions
+- [x] S0.4 Create `opencode.json` (permissions, agent definitions, task list)
+- [x] S0.5 Scaffold `backend/` Cargo workspace skeleton (Axum, tokio, geo, moka, reqwest)
+- [x] S0.6 Scaffold `frontend/` via Vite React-TS + install pnpm deps (tailwind, tanstack query, tanstack router, resium, cesium, shadcn init)
+- [x] S0.7 Establish dark cyber-radar Tailwind theme tokens in `frontend/src/styles/globals.css`
+- [x] S0.8 Initial commit `chore(repo): monorepo bootstrap` on `main`
 
 ---
 
