@@ -67,6 +67,11 @@ AeroShield-3D/
 
 Caching & rate limits: OpenSky anonymous = 400 req/day, 100 req/5min. Poll every 60s. Cache with `moka` crate in backend.
 
+### MCP Tools (configured in `opencode.json` under `mcp`)
+- `context7` — live docs search (Cesium/resium, TanStack Query/Router, Axum, `geo` crate, shadcn/ui). Use when unsure of an API instead of guessing.
+- `gh_grep` — search real GitHub code for patterns (SIGMET polygon parsing, Cesium extruded polygons, OpenSky state-vector handling). Use when you need a concrete reference implementation.
+- Invoke in prompts with `use context7` / `use gh_grep`.
+
 ## 7. Frontend Visual Style — "Dark Cyber-Radar"
 
 - Background: near-black radar screen (`#05070a` / `oklch(15% 0.02 240)`).
