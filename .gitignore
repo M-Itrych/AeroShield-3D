@@ -1,0 +1,39 @@
+# ---------- Rust ----------
+target/
+**/*.rs.bk
+Cargo.lock.bak
+*.pdb
+
+# ---------- Node / Frontend ----------
+node_modules/
+dist/
+dist-ssr/
+.vite/
+*.tsbuildinfo
+.eslintcache
+next-env.d.ts
+
+# ---------- Cesium ----------
+frontend/public/cesium/
+public/Cesium/
+cesium-tokens.json
+
+# ---------- Env ----------
+.env
+.env.*
+!.env.example
+!.env.production.example
+
+# ---------- Editors / OS ----------
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+*.log
+logs/
+
+# ---------- Build caches ----------
+.cache/
+.turbo/
+coverage/

@@ -1,0 +1,55 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "permissions": {
+    "edit": ["AGENTS.md", "PLAN.md", "README.md", ".env.example"],
+    "bash": {
+      "allow": [
+        "cargo fmt",
+        "cargo clippy --all-targets -- -D warnings",
+        "cargo test",
+        "cargo build",
+        "cargo run",
+        "cargo check",
+        "pnpm install",
+        "pnpm run lint",
+        "pnpm run typecheck",
+        "pnpm run test",
+        "pnpm run build",
+        "pnpm run dev",
+        "pnpm dlx shadcn@latest add *"
+      ]
+    }
+  },
+  "agents": [
+    {
+      "name": "setup",
+      "description": "Repo bootstrap agent. Scaffolds monorepo, git config, toolchain. Only runs at Stage 0.",
+      "mode": "primary",
+      "prompt": "You are the setup agent. Read AGENTS.md and PLAN.md. Complete ALL Stage 0 tasks before any other agent starts. Create structure: backend/ Cargo workspace skeleton, frontend/ via Vite React-TS, install pnpm deps (tailwind, tanstack query, tanstack router, resium, cesium, shadcn init). Establish dark cyber-radar Tailwind theme tokens in frontend/src/styles/globals.css per AGENTS.md §7. Commit as 'chore(repo): monorepo bootstrap'. Do not touch Stage 1+."
+    },
+    {
+      "name": "backend-core",
+      "description": "Rust/Axum backend agent. Implements data fetchers, spatial risk engine, SSE. Stage 1.",
+      "mode": "subagent",
+      "prompt": "You are the backend-core agent. Read AGENTS.md (esp §6 Data Sources, §8 Spatial, §9 SSE Contract) and PLAN.md Stage 1. Create branch feat/backend-core. Implement OpenSky client (60s moka cache), AviationWeather SIGMET parser -> HazardPolygon, airports DB loader, risk::assess using geo crate, Axum routes: /api/flights, /api/sigmets, /api/airports/:icao, /api/sse/risk-stream. Add unit tests. Run cargo fmt && cargo clippy --all-targets -- -D warnings && cargo test. Update PLAN.md checkboxes. Open PR."
+    },
+    {
+      "name": "frontend-core",
+      "description": "React/Vite/Cesium agent. Builds globe, layers, SSE subscription. Stage 2. Depends on backend SSE route from Stage 1.",
+      "mode": "subagent",
+      "prompt": "You are the frontend-core agent. Read AGENTS.md (§7 Dark Cyber-Radar, §9 SSE Contract) and PLAN.md Stage 2. Create branch feat/frontend-core. Configure TanStack Router (/ + /flight/$id + /airport/$icao), TanStack Query (60s refetch). shadcn init + add button/card/badge/dialog/scrollarea/separator/tabs/tooltip/skeleton. Build CesiumGlobe (dark imagery, no chrome), FlightLayer (sprite billboards w/ heading), HazardLayer (translucent red extruded polygons from /api/sigmets), RiskSubscriber hook (/api/sse/risk-stream via EventSource -> query cache ['risk-flights']). Apply CRT scanline overlay + radar grid. Run pnpm run lint && pnpm run typecheck. Update PLAN.md. Open PR."
+    },
+    {
+      "name": "frontend-ui",
+      "description": "UI panels, detail dashboards, HUD. Stage 3. Depends on Stage 2 layers.",
+      "mode": "subagent",
+      "prompt": "You are the frontend-ui agent. Read AGENTS.md §7 and PLAN.md Stage 3. Create branch feat/frontend-ui. Build FlightsPanel (left, monospace list w/ risk badges per shadcn Card+Badge), HazardPanel (right, click-to-fly-to), /flight/$id dashboard (callsign/origin/dest/alt/speed/heading/risk reasons), /airport/$icao view, top HUD bar (UTC clock, counts, status pulse), click-plane flyTo + glow selection, keyboard shortcuts (f/r/space), loading/error/empty states w/ Skeleton+Card. Run pnpm run lint && pnpm run typecheck. Update PLAN.md. Open PR."
+    },
+    {
+      "name": "hardening",
+      "description": "Reliability, logging, smoke tests, final README. Stage 4.",
+      "mode": "subagent",
+      "prompt": "You are the hardening agent. Read AGENTS.md and PLAN.md Stage 4. Create branch feat/hardening. Backend: OpenSky 429 backoff, SIGMET 5min refresh cadence, tracing JSON logs, /healthz, /metrics via tower-http::trace. Frontend: cesium offline imagery fallback. scripts/smoke.ps1 hitting /healthz + /api/flights. Update README 'Run Locally' section. Final verify: cargo test && pnpm test && pnpm build. Update PLAN.md. Open PR."
+    }
+  ]
+}

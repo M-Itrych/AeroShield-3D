@@ -1,0 +1,32 @@
+# Normalize line endings across all platforms
+* text=auto eol=lf
+
+# Source files explicitly text
+*.rs    text diff=rust
+*.toml  text
+*.ts    text diff=typescript
+*.tsx   text diff=typescript
+*.js    text
+*.jsx   text
+*.json  text
+*.md    text
+*.css   text
+*.html  text
+*.sh    text eol=lf
+*.ps1   text eol=crlf
+
+# Binary assets
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.ico   binary
+*.svg   binary
+*.glb   binary
+*.gltf  binary
+*.woff  binary
+*.woff2 binary
+*.mp4   binary
+*.webm  binary
+*.zip   binary
+*.gz    binary

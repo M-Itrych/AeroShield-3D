@@ -1,0 +1,43 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 15% 0.02 240;
+    --foreground: 95% 0.01 120;
+    --primary: 85% 0.18 160;
+    --destructive: 65% 0.22 25;
+    --border: 80% 0.12 190;
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+    background: oklch(var(--background));
+    color: oklch(var(--foreground));
+    font-family: ui-monospace, "JetBrains Mono", monospace;
+  }
+}
+
+@layer components {
+  .cesium-container {
+    position: relative;
+  }
+
+  .cesium-container::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image: repeating-linear-gradient(
+      0deg,
+      rgba(18, 255, 170, 0.04) 0px,
+      rgba(18, 255, 170, 0.04) 1px,
+      transparent 1px,
+      transparent 3px
+    );
+    mix-blend-mode: screen;
+  }
+}
