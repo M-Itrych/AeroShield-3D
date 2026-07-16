@@ -9,6 +9,7 @@ import { FlightTrailLayer } from "@/components/FlightTrailLayer";
 import { RouteLineLayer } from "@/components/RouteLineLayer";
 import { FlightPredictLayer } from "@/components/FlightPredictLayer";
 import { RerouteLayer } from "@/components/RerouteLayer";
+import { RadarSweepLayer } from "@/components/RadarSweepLayer";
 import { useFlights } from "@/hooks/use-flights";
 import { useSigmets } from "@/hooks/use-sigmets";
 import { useAirports } from "@/hooks/use-airports";
@@ -134,6 +135,7 @@ function MobileGlobePage() {
         {selectedId && (
           <FlightTrailLayer trail={trailQuery.data?.trail ?? []} icao24={selectedId} />
         )}
+        {selectedFlight && <RadarSweepLayer flight={selectedFlight} />}
         <RouteLineLayer route={routeQuery.data ?? null} flight={selectedFlight} />
         {selectedFlight && (
           <FlightPredictLayer flight={selectedFlight} route={routeQuery.data ?? null} />

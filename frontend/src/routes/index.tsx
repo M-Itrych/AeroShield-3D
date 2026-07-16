@@ -8,6 +8,7 @@ import { FlightTrailLayer } from "@/components/FlightTrailLayer";
 import { RouteLineLayer } from "@/components/RouteLineLayer";
 import { FlightPredictLayer } from "@/components/FlightPredictLayer";
 import { RerouteLayer } from "@/components/RerouteLayer";
+import { RadarSweepLayer } from "@/components/RadarSweepLayer";
 import { AirportsLayer } from "@/components/AirportsLayer";
 import { FlightDetailPanel } from "@/components/FlightDetailPanel";
 import { GlobeControlBar, type LayerVisibility } from "@/components/GlobeControlBar";
@@ -171,6 +172,9 @@ function GlobePage() {
         )}
         {layers.trails && selectedId && (
           <FlightTrailLayer trail={trailQuery.data?.trail ?? []} icao24={selectedId} />
+        )}
+        {layers.trails && selectedFlight && (
+          <RadarSweepLayer flight={selectedFlight} />
         )}
         {layers.routes && (
           <RouteLineLayer route={routeQuery.data ?? null} flight={selectedFlight} />

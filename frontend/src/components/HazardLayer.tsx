@@ -8,6 +8,9 @@ import {
   ArcType,
   ConstantProperty,
   DistanceDisplayCondition,
+  CallbackProperty,
+  JulianDate,
+  type JulianDate as JulianDateType,
 } from "cesium";
 import { memo, useMemo } from "react";
 import type { HazardPolygon, FlightVector } from "@/types/domain";
@@ -21,9 +24,8 @@ interface HazardLayerProps {
 
 const FT_TO_M = 0.3048;
 const GROUND_FT = 0;
-
+const OUTLINE_BASE = Color.fromCssColorString("#ff5f1f");
 const HAZARD_FILL_FULL = Color.fromCssColorString("#ff5f1f").withAlpha(0.12);
-const HAZARD_OUTLINE_FULL = Color.fromCssColorString("#ff5f1f").withAlpha(0.7);
 const HAZARD_FILL_DIM = Color.fromCssColorString("#ff5f1f").withAlpha(0.04);
 const HAZARD_OUTLINE_DIM = Color.fromCssColorString("#ff5f1f").withAlpha(0.2);
 
@@ -31,6 +33,20 @@ const DEFAULT_MIN_FT = 0;
 const DEFAULT_MAX_FT = 60000;
 
 const HAZARD_NEAR_FAR = new DistanceDisplayCondition(0, 15_000_000);
+
+const PULSE_PERIOD_S = 1.6;
+const PULSE_EPOCH = JulianDate.now();
+
+function createPulsingOutline(): CallbackProperty {
+  return new CallbackProperty((time?: JulianDateType) => {
+    const t = time ?? JulianDate.now();
+    const elapsed = JulianDate.secondsDifference(t, PULSE_EPOCH);
+    const phase = (elapsed % PULSE_PERIOD_S) / PULSE_PERIOD_S;
+    const wave = (1 + Math.sin(phase * 2 * Math.PI)) / 2;
+    const alpha = 0.4 + 0.4 * wave;
+    return OUTLINE_BASE.withAlpha(alpha);
+  }, false);
+}
 
 function altBandIntersectsFlight(
   sig: HazardPolygon,
@@ -87,7 +103,9 @@ export const HazardLayer = memo(function HazardLayer({
 
         const intersects = altBandIntersectsFlight(sig, flightAltFt);
         const fill = intersects ? HAZARD_FILL_FULL : HAZARD_FILL_DIM;
-        const outline = intersects ? HAZARD_OUTLINE_FULL : HAZARD_OUTLINE_DIM;
+        const outlineColor = intersects
+          ? createPulsingOutline()
+          : new ConstantProperty(HAZARD_OUTLINE_DIM);
 
         const hierarchy = new PolygonHierarchy(
           Cartesian3.fromDegreesArray(coords),
@@ -104,7 +122,7 @@ export const HazardLayer = memo(function HazardLayer({
               hierarchy,
               material: new ColorMaterialProperty(fill),
               outline: true,
-              outlineColor: outline,
+              outlineColor: outlineColor,
               height: minM,
               extrudedHeight: extrudedHeightProp,
               heightReference: HeightReference.NONE,

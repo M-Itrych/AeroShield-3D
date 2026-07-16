@@ -2,7 +2,7 @@ import { Entity, PolylineGraphics, PointGraphics } from "resium";
 import {
   Cartesian3,
   Color,
-  ColorMaterialProperty,
+  PolylineGlowMaterialProperty,
   ArcType,
   HeightReference,
 } from "cesium";
@@ -17,7 +17,7 @@ interface FlightTrailLayerProps {
 const ORIGIN_CORE = Color.fromCssColorString("#39ff14").withAlpha(0.95);
 const ORIGIN_RING = Color.fromCssColorString("#39ff14").withAlpha(0.35);
 const TRACK_BG = Color.fromCssColorString("#08080a").withAlpha(0.8);
-const TRAIL_COLOR = Color.fromCssColorString("#39ff14").withAlpha(0.55);
+const TRAIL_COLOR = Color.fromCssColorString("#39ff14").withAlpha(0.7);
 const TRAIL_HEAD_RING = Color.fromCssColorString("#39ff14").withAlpha(0.5);
 
 export function FlightTrailLayer({ trail, icao24 }: FlightTrailLayerProps) {
@@ -56,8 +56,14 @@ export function FlightTrailLayer({ trail, icao24 }: FlightTrailLayerProps) {
       <Entity name={`trail-${icao24}`}>
         <PolylineGraphics
           positions={positions}
-          width={2}
-          material={new ColorMaterialProperty(TRAIL_COLOR)}
+          width={4}
+          material={
+            new PolylineGlowMaterialProperty({
+              glowPower: 0.3,
+              taperPower: 0.3,
+              color: TRAIL_COLOR,
+            })
+          }
           arcType={ArcType.NONE}
         />
       </Entity>

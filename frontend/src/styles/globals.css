@@ -73,6 +73,28 @@
     background-size: 100% 100%;
   }
 
+  .starfield-bg::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image:
+      radial-gradient(1px 1px at 15% 22%, rgba(220, 235, 240, 0.7), transparent 60%),
+      radial-gradient(1px 1px at 48% 68%, rgba(200, 220, 230, 0.6), transparent 60%),
+      radial-gradient(1px 1px at 78% 32%, rgba(210, 225, 235, 0.65), transparent 60%),
+      radial-gradient(1px 1px at 33% 85%, rgba(220, 235, 240, 0.55), transparent 60%),
+      radial-gradient(1px 1px at 62% 12%, rgba(190, 215, 225, 0.6), transparent 60%);
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    animation: twinkle 4.5s ease-in-out infinite alternate;
+    z-index: 0;
+  }
+
+  @keyframes twinkle {
+    0%, 100% { opacity: 0.2; }
+    50% { opacity: 0.8; }
+  }
+
   .radar-grid-bg {
     background-image:
       linear-gradient(rgba(57, 255, 20, 0.035) 1px, transparent 1px),
