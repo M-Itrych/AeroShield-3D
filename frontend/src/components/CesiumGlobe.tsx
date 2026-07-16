@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Viewer as ResiumViewer, ImageryLayer } from "resium";
 import type { CesiumComponentRef } from "resium";
 import {
@@ -12,17 +12,32 @@ interface CesiumGlobeProps {
   onReady?: (viewer: CesiumViewer) => void;
 }
 
-const GLOBE_BASE_COLOR = Color.fromCssColorString("#121315");
-const CONTINENT_COLOR = Color.fromCssColorString("#1c1d21");
+type Theme = "dark" | "light";
 
-const darkImageryProvider = new UrlTemplateImageryProvider({
+function currentTheme(): Theme {
+  if (typeof document === "undefined") return "dark";
+  return document.documentElement.getAttribute("data-theme") === "light" ? "light" : "dark";
+}
+
+const THEME_COLORS: Record<Theme, { base: Color; bg: Color }> = {
+  dark: {
+    base: Color.fromCssColorString("#121315"),
+    bg: Color.fromCssColorString("#0b0c0e"),
+  },
+  light: {
+    base: Color.fromCssColorString("#e9ebee"),
+    bg: Color.fromCssColorString("#fafafa"),
+  },
+};
+
+const darkBase = new UrlTemplateImageryProvider({
   url: "https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}.png",
   subdomains: ["a", "b", "c", "d"],
   credit: "CARTO",
   maximumLevel: 18,
 });
 
-const labelsImageryProvider = new UrlTemplateImageryProvider({
+const darkLabels = new UrlTemplateImageryProvider({
   url: "https://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}.png",
   subdomains: ["a", "b", "c", "d"],
   credit: "CARTO",
@@ -30,8 +45,24 @@ const labelsImageryProvider = new UrlTemplateImageryProvider({
   maximumLevel: 6,
 });
 
-function tuneViewer(viewer: CesiumViewer) {
+const lightBase = new UrlTemplateImageryProvider({
+  url: "https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png",
+  subdomains: ["a", "b", "c", "d"],
+  credit: "CARTO",
+  maximumLevel: 18,
+});
+
+const lightLabels = new UrlTemplateImageryProvider({
+  url: "https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}.png",
+  subdomains: ["a", "b", "c", "d"],
+  credit: "CARTO",
+  minimumLevel: 0,
+  maximumLevel: 6,
+});
+
+function tuneViewer(viewer: CesiumViewer, theme: Theme) {
   const scene = viewer.scene;
+  const colors = THEME_COLORS[theme];
 
   scene.postProcessStages.ambientOcclusion.enabled = false;
   scene.postProcessStages.bloom.enabled = false;
@@ -43,12 +74,12 @@ function tuneViewer(viewer: CesiumViewer) {
   scene.fog.enabled = false;
   scene.shadowMap.enabled = false;
   scene.highDynamicRange = false;
-  scene.backgroundColor = Color.fromCssColorString("#08080a");
+  scene.backgroundColor = colors.bg;
 
   const globe = scene.globe;
   globe.depthTestAgainstTerrain = false;
   globe.maximumScreenSpaceError = 2;
-  globe.baseColor = GLOBE_BASE_COLOR;
+  globe.baseColor = colors.base;
   globe.showWaterEffect = false;
 
   const sscc = scene.screenSpaceCameraController;
@@ -59,9 +90,24 @@ function tuneViewer(viewer: CesiumViewer) {
 
 export function CesiumGlobe({ children, onReady }: CesiumGlobeProps) {
   const viewerRef = useRef<CesiumViewer | null>(null);
+  const [theme, setTheme] = useState<Theme>(currentTheme);
 
-  const baseProvider = useMemo(() => darkImageryProvider, []);
-  const labelsProvider = useMemo(() => labelsImageryProvider, []);
+  const baseProvider = theme === "dark" ? darkBase : lightBase;
+  const labelsProvider = theme === "dark" ? darkLabels : lightLabels;
+
+  useEffect(() => {
+    const observer = new MutationObserver(() => setTheme(currentTheme()));
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["data-theme"],
+    });
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const viewer = viewerRef.current;
+    if (viewer) tuneViewer(viewer, theme);
+  }, [theme]);
 
   useEffect(() => {
     return () => {
@@ -87,7 +133,7 @@ export function CesiumGlobe({ children, onReady }: CesiumGlobeProps) {
           const el = r?.cesiumElement;
           if (el) {
             viewerRef.current = el;
-            tuneViewer(el);
+            tuneViewer(el, currentTheme());
             onReady?.(el);
           }
         }}
@@ -100,5 +146,5 @@ export function CesiumGlobe({ children, onReady }: CesiumGlobeProps) {
   );
 }
 
-export { CONTINENT_COLOR };
+export { THEME_COLORS };
 

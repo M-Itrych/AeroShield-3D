@@ -52,8 +52,8 @@ function InfoRow({
   accent?: "grid" | "warn";
 }) {
   return (
-    <div className="flex flex-col gap-1 border-l border-hud-grid/15 pl-3">
-      <span className="font-mono text-[9px] tracking-[0.16em] text-hud-dim">
+    <div className="flex flex-col gap-1 border-l border-hud-border pl-3">
+      <span className="font-mono text-[11px] tracking-[0.16em] text-hud-dim">
         {label}
       </span>
       <span

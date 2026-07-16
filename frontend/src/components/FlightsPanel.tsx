@@ -65,7 +65,7 @@ export function FlightsPanel({
     return (
       <button
         onClick={() => setCollapsed(false)}
-        className="absolute left-0 top-9 z-30 flex h-12 w-8 items-center justify-center border-r border-b border-hud-grid/20 bg-hud-charcoal/95 backdrop-blur-md"
+        className="absolute left-0 top-9 z-30 flex h-12 w-8 items-center justify-center border-r border-b border-hud-border bg-hud-charcoal/95 backdrop-blur-md"
         aria-label="Expand flights panel"
       >
         <ChevronRight className="size-4 text-hud-grid" />
@@ -74,11 +74,11 @@ export function FlightsPanel({
   }
 
   return (
-    <aside className="absolute left-0 top-9 z-30 flex h-[calc(100%-2.25rem)] w-64 flex-col border-r border-hud-grid/20 bg-hud-charcoal/95 backdrop-blur-md sm:w-72">
-      <div className="flex items-center justify-between border-b border-hud-grid/20 px-3 py-2">
+    <aside className="absolute left-0 top-9 z-30 flex h-[calc(100%-2.25rem)] w-64 flex-col border-r border-hud-border bg-hud-charcoal/95 backdrop-blur-md sm:w-72">
+      <div className="flex items-center justify-between border-b border-hud-border px-3 py-2">
         <div className="flex items-center gap-1.5">
           <span className="size-1.5 animate-status-blink rounded-full bg-hud-grid" />
-          <h2 className="font-mono text-[10px] font-bold tracking-[0.18em] text-hud-grid">
+          <h2 className="font-mono text-[12px] font-bold tracking-[0.18em] text-hud-grid">
             ACTIVE TRACKS
           </h2>
         </div>
@@ -91,26 +91,26 @@ export function FlightsPanel({
         </button>
       </div>
 
-      <div className="flex flex-col gap-2 border-b border-hud-grid/20 px-3 py-2">
+      <div className="flex flex-col gap-2 border-b border-hud-border px-3 py-2">
         <input
           ref={searchInputRef}
           type="text"
           value={search}
           onChange={(e) => onSearchChange?.(e.target.value)}
           placeholder="QUERY CALLSIGN / ICAO..."
-          className="w-full border border-hud-grid/20 bg-hud-charcoal/60 px-2 py-1.5 font-mono text-[11px] text-hud-ink placeholder:text-hud-dim placeholder:tracking-wider focus:border-hud-grid focus:outline-none"
+          className="w-full border border-hud-border bg-hud-charcoal/60 px-2 py-1.5 font-mono text-[13px] text-hud-ink placeholder:text-hud-dim placeholder:tracking-wider focus:border-hud-grid focus:outline-none"
         />
         <div className="flex items-center gap-1">
           {RISK_FILTERS.map((r) => (
             <button
               key={r}
               onClick={() => onRiskFilterChange?.(r === "MED" ? "MEDIUM" : r)}
-              className={`flex-1 border px-1 py-0.5 font-mono text-[9px] tracking-wider transition-colors ${
+              className={`flex-1 border px-1 py-0.5 font-mono text-[11px] tracking-wider transition-colors ${
                 (riskFilter === "MEDIUM" ? "MED" : riskFilter) === r
                   ? r === "HIGH"
                     ? "border-hud-warn bg-hud-warn/10 text-hud-warn"
                     : "border-hud-grid bg-hud-grid/10 text-hud-grid"
-                  : "border-hud-grid/15 text-hud-dim hover:border-hud-grid/40"
+                  : "border-hud-border text-hud-dim hover:border-hud-grid/40"
               }`}
             >
               {r}
@@ -120,23 +120,23 @@ export function FlightsPanel({
       </div>
 
       {selectedFlight && (
-        <div className="flex flex-col gap-1 border-b border-hud-grid/20 bg-hud-grid/5 px-3 py-2">
+        <div className="flex flex-col gap-1 border-b border-hud-border bg-hud-grid/5 px-3 py-2">
           <div className="flex items-center justify-between">
-            <span className="font-mono text-[11px] font-bold tracking-wider text-hud-ink">
+            <span className="font-mono text-[13px] font-bold tracking-wider text-hud-ink">
               {selectedFlight.callsign?.trim() || selectedFlight.icao24}
             </span>
             <button
               onClick={() => onFollowModeChange?.(!followMode)}
-              className={`border px-2 py-0.5 font-mono text-[9px] tracking-wider transition-colors ${
+              className={`border px-2 py-0.5 font-mono text-[11px] tracking-wider transition-colors ${
                 followMode
                   ? "border-hud-grid bg-hud-grid/15 text-hud-grid"
-                  : "border-hud-grid/25 text-hud-dim hover:border-hud-grid/50"
+                  : "border-hud-border text-hud-dim hover:border-hud-grid/50"
               }`}
             >
               {followMode ? "LOCK-ON" : "TRACK"}
             </button>
           </div>
-          <div className="font-mono text-[10px] text-hud-dim">
+          <div className="font-mono text-[12px] text-hud-dim">
             {selectedFlight.origin_country}
             {selectedFlight.baro_altitude
               ? ` | ${Math.round(selectedFlight.baro_altitude * 3.28)}ft`
@@ -146,7 +146,7 @@ export function FlightsPanel({
               : ""}
           </div>
           {route && (route.departure || route.arrival) && (
-            <div className="font-mono text-[10px] text-hud-grid">
+            <div className="font-mono text-[12px] text-hud-grid">
               {route.departure_airport?.iata ?? route.departure ?? "---"} {"->"}{" "}
               {route.arrival_airport?.iata ?? route.arrival ?? "---"}
             </div>
@@ -164,7 +164,7 @@ export function FlightsPanel({
             </div>
           )}
           {!isLoading && flights.length === 0 && (
-            <div className="p-4 text-center font-mono text-[10px] tracking-wider text-hud-dim">
+            <div className="p-4 text-center font-mono text-[12px] tracking-wider text-hud-dim">
               NO TRACK DATA
             </div>
           )}
@@ -191,19 +191,19 @@ export function FlightsPanel({
                       width: "100%",
                       transform: `translateY(${vItem.start}px)`,
                     }}
-                    className={`flex h-12 items-center justify-between border-b border-hud-grid/10 px-3 py-1.5 text-left transition-colors hover:bg-hud-grid/10 ${
+                    className={`flex h-12 items-center justify-between border-b border-hud-border px-3 py-1.5 text-left transition-colors hover:bg-hud-grid/10 ${
                       high ? "bg-hud-warn/10" : ""
                     } ${isSelected ? "bg-hud-grid/15" : ""}`}
                   >
                     <div className="flex flex-col gap-0.5 overflow-hidden">
                       <span
-                        className={`truncate font-mono text-[11px] font-medium ${
+                        className={`truncate font-mono text-[13px] font-medium ${
                           high ? "text-hud-warn" : "text-hud-ink"
                         }`}
                       >
                         {f.callsign?.trim() || f.icao24}
                       </span>
-                      <span className="truncate font-mono text-[10px] text-hud-dim">
+                      <span className="truncate font-mono text-[12px] text-hud-dim">
                         {f.origin_country}
                         {f.baro_altitude
                           ? ` ${Math.round(f.baro_altitude * 3.28)}ft`
@@ -211,12 +211,12 @@ export function FlightsPanel({
                       </span>
                     </div>
                     <span
-                      className={`border px-1.5 py-0.5 font-mono text-[9px] tracking-wider ${
+                      className={`border px-1.5 py-0.5 font-mono text-[11px] tracking-wider ${
                         high
                           ? "border-hud-warn text-hud-warn"
                           : warn
                             ? "border-hud-warn/50 text-hud-warn/80"
-                            : "border-hud-grid/30 text-hud-grid/80"
+                            : "border-hud-border text-hud-grid/80"
                       }`}
                     >
                       {risk?.risk ?? "NONE"}

@@ -4,26 +4,72 @@
 
 @layer base {
   :root {
-    --background: 240 6% 4%;
-    --foreground: 140 6% 90%;
-    --card: 240 5% 7%;
-    --card-foreground: 140 6% 90%;
-    --popover: 240 5% 7%;
-    --popover-foreground: 140 6% 90%;
-    --primary: 110 100% 53%;
-    --primary-foreground: 240 6% 4%;
-    --secondary: 240 4% 11%;
-    --secondary-foreground: 140 6% 90%;
-    --muted: 240 4% 9%;
-    --muted-foreground: 140 4% 58%;
-    --accent: 16 100% 56%;
-    --accent-foreground: 240 6% 4%;
-    --destructive: 16 100% 56%;
-    --destructive-foreground: 240 6% 4%;
-    --border: 240 6% 16%;
-    --input: 240 6% 16%;
-    --ring: 110 100% 53%;
-    --radius: 0.125rem;
+    /* Light theme — minimalistic light surface */
+    --background: 220 14% 98%;
+    --foreground: 220 12% 14%;
+    --card: 0 0% 100%;
+    --card-foreground: 220 12% 14%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 12% 14%;
+    --primary: 156 60% 42%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 220 14% 94%;
+    --secondary-foreground: 220 12% 14%;
+    --muted: 220 14% 94%;
+    --muted-foreground: 220 8% 40%;
+    --accent: 12 80% 58%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 220 12% 88%;
+    --input: 220 12% 88%;
+    --ring: 156 60% 42%;
+    --radius: 0.25rem;
+
+    /* hud token aliases (shared names, theme-specific values) */
+    --hud-space: 220 14% 98%;
+    --hud-charcoal: 0 0% 100%;
+    --hud-continent: 220 12% 92%;
+    --hud-grid: 156 60% 42%;     /* accent: safe / active / data */
+    --hud-warn: 12 80% 58%;      /* accent2: hazard / warning */
+    --hud-crit: 0 72% 51%;       /* critical: HIGH risk only */
+    --hud-border: 220 12% 88%;   /* neutral structural border */
+    --hud-ink: 220 12% 14%;      /* primary text */
+    --hud-dim: 220 8% 40%;       /* muted text */
+  }
+
+  [data-theme="dark"] {
+    /* Dark theme — minimalistic warm near-black */
+    --background: 222 10% 7%;
+    --foreground: 215 16% 78%;
+    --card: 222 9% 9%;
+    --card-foreground: 215 16% 78%;
+    --popover: 222 9% 9%;
+    --popover-foreground: 215 16% 78%;
+    --primary: 156 58% 50%;
+    --primary-foreground: 222 10% 7%;
+    --secondary: 222 8% 12%;
+    --secondary-foreground: 215 16% 78%;
+    --muted: 222 8% 12%;
+    --muted-foreground: 215 10% 45%;
+    --accent: 12 78% 60%;
+    --accent-foreground: 222 10% 7%;
+    --destructive: 0 70% 62%;
+    --destructive-foreground: 222 10% 7%;
+    --border: 220 10% 16%;
+    --input: 220 10% 16%;
+    --ring: 156 58% 50%;
+    --radius: 0.25rem;
+
+    --hud-space: 222 10% 7%;
+    --hud-charcoal: 222 8% 10%;
+    --hud-continent: 222 7% 16%;
+    --hud-grid: 156 58% 50%;
+    --hud-warn: 12 78% 60%;
+    --hud-crit: 0 70% 62%;
+    --hud-border: 220 10% 16%;
+    --hud-ink: 215 16% 78%;
+    --hud-dim: 215 10% 45%;
   }
 }
 
@@ -55,7 +101,7 @@
   }
 
   .starfield-bg {
-    background-color: #08080a;
+    background-color: hsl(var(--hud-space));
     background-image:
       radial-gradient(1px 1px at 12% 18%, rgba(200, 220, 230, 0.55), transparent 60%),
       radial-gradient(1px 1px at 27% 72%, rgba(180, 210, 225, 0.45), transparent 60%),
@@ -73,12 +119,45 @@
     background-size: 100% 100%;
   }
 
+  /* In light mode the starfield is suppressed — a clean light canvas instead. */
+  [data-theme="light"] .starfield-bg,
+  :root .starfield-bg[data-theme="light"] {
+    background-image: none;
+  }
+
+  .starfield-bg::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image:
+      radial-gradient(1px 1px at 15% 22%, rgba(220, 235, 240, 0.7), transparent 60%),
+      radial-gradient(1px 1px at 48% 68%, rgba(200, 220, 230, 0.6), transparent 60%),
+      radial-gradient(1px 1px at 78% 32%, rgba(210, 225, 235, 0.65), transparent 60%),
+      radial-gradient(1px 1px at 33% 85%, rgba(220, 235, 240, 0.55), transparent 60%),
+      radial-gradient(1px 1px at 62% 12%, rgba(190, 215, 225, 0.6), transparent 60%);
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    animation: twinkle 4.5s ease-in-out infinite alternate;
+    z-index: 0;
+  }
+
+  /* Hide the twinkling star layer in light mode. */
+  [data-theme="light"] .starfield-bg::after {
+    display: none;
+  }
+
+  @keyframes twinkle {
+    0%, 100% { opacity: 0.2; }
+    50% { opacity: 0.8; }
+  }
+
   .radar-grid-bg {
     background-image:
-      linear-gradient(rgba(57, 255, 20, 0.035) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(57, 255, 20, 0.035) 1px, transparent 1px),
-      linear-gradient(rgba(57, 255, 20, 0.015) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(57, 255, 20, 0.015) 1px, transparent 1px);
+      linear-gradient(hsl(var(--hud-grid) / 0.05) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--hud-grid) / 0.05) 1px, transparent 1px),
+      linear-gradient(hsl(var(--hud-grid) / 0.02) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--hud-grid) / 0.02) 1px, transparent 1px);
     background-size: 96px 96px, 96px 96px, 24px 24px, 24px 24px;
     background-position: -1px -1px;
   }
@@ -91,5 +170,32 @@
 
 .cesium-widget,
 .cesium-widget canvas {
-  background-color: #08080a !important;
+  background-color: hsl(var(--hud-space)) !important;
+}
+
+/* ---- Theme transition: circular reveal wipe ---- */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+::view-transition-new(root) {
+  animation: theme-reveal 280ms cubic-bezier(0.2, 0, 0, 1);
+}
+
+@keyframes theme-reveal {
+  from {
+    clip-path: circle(0% at var(--theme-x, 50%) var(--theme-y, 50%));
+  }
+  to {
+    clip-path: circle(150% at var(--theme-x, 50%) var(--theme-y, 50%));
+  }
+}
+
+/* Browsers without view-transition: a soft cross-fade on body. */
+@supports not selector(::view-transition-old(root)) {
+  body {
+    transition: background-color 200ms ease, color 200ms ease;
+  }
 }

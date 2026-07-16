@@ -7,25 +7,46 @@ import {
   HeightReference,
   ArcType,
   ConstantProperty,
+  DistanceDisplayCondition,
+  CallbackProperty,
+  JulianDate,
+  type JulianDate as JulianDateType,
 } from "cesium";
 import { memo, useMemo } from "react";
 import type { HazardPolygon, FlightVector } from "@/types/domain";
+import type { BboxParams } from "@/hooks/use-viewport-bbox";
 
 interface HazardLayerProps {
   sigmets: HazardPolygon[];
   selectedFlight?: FlightVector | null;
+  viewportBbox?: BboxParams;
 }
 
 const FT_TO_M = 0.3048;
 const GROUND_FT = 0;
-
+const OUTLINE_BASE = Color.fromCssColorString("#ff5f1f");
 const HAZARD_FILL_FULL = Color.fromCssColorString("#ff5f1f").withAlpha(0.12);
-const HAZARD_OUTLINE_FULL = Color.fromCssColorString("#ff5f1f").withAlpha(0.7);
 const HAZARD_FILL_DIM = Color.fromCssColorString("#ff5f1f").withAlpha(0.04);
 const HAZARD_OUTLINE_DIM = Color.fromCssColorString("#ff5f1f").withAlpha(0.2);
 
 const DEFAULT_MIN_FT = 0;
 const DEFAULT_MAX_FT = 60000;
+
+const HAZARD_NEAR_FAR = new DistanceDisplayCondition(0, 8_000_000);
+
+const PULSE_PERIOD_S = 1.6;
+const PULSE_EPOCH = JulianDate.now();
+
+function createPulsingOutline(): CallbackProperty {
+  return new CallbackProperty((time?: JulianDateType) => {
+    const t = time ?? JulianDate.now();
+    const elapsed = JulianDate.secondsDifference(t, PULSE_EPOCH);
+    const phase = (elapsed % PULSE_PERIOD_S) / PULSE_PERIOD_S;
+    const wave = (1 + Math.sin(phase * 2 * Math.PI)) / 2;
+    const alpha = 0.4 + 0.4 * wave;
+    return OUTLINE_BASE.withAlpha(alpha);
+  }, false);
+}
 
 function altBandIntersectsFlight(
   sig: HazardPolygon,
@@ -37,9 +58,27 @@ function altBandIntersectsFlight(
   return flightAltFt >= min && flightAltFt <= max;
 }
 
+function polygonOverlapsBbox(sig: HazardPolygon, b: BboxParams): boolean {
+  let hasOutside = false;
+  let minLon = Infinity;
+  let maxLon = -Infinity;
+  let minLat = Infinity;
+  let maxLat = -Infinity;
+  for (const [lon, lat] of sig.points) {
+    if (lon < minLon) minLon = lon;
+    if (lon > maxLon) maxLon = lon;
+    if (lat < minLat) minLat = lat;
+    if (lat > maxLat) maxLat = lat;
+  }
+  if (maxLon < b.lomin || minLon > b.lomax) hasOutside = true;
+  if (maxLat < b.lamin || minLat > b.lamax) hasOutside = true;
+  return !hasOutside;
+}
+
 export const HazardLayer = memo(function HazardLayer({
   sigmets,
   selectedFlight,
+  viewportBbox,
 }: HazardLayerProps) {
   const flightAltFt = selectedFlight?.baro_altitude
     ? selectedFlight.baro_altitude * 3.28084
@@ -47,7 +86,11 @@ export const HazardLayer = memo(function HazardLayer({
 
   const entities = useMemo(
     () =>
-      sigmets.map((sig) => {
+      sigmets
+        .filter((sig) =>
+          viewportBbox ? polygonOverlapsBbox(sig, viewportBbox) : true,
+        )
+        .map((sig) => {
         const coords: number[] = [];
         for (const [lon, lat] of sig.points) {
           coords.push(lon, lat);
@@ -60,13 +103,15 @@ export const HazardLayer = memo(function HazardLayer({
 
         const intersects = altBandIntersectsFlight(sig, flightAltFt);
         const fill = intersects ? HAZARD_FILL_FULL : HAZARD_FILL_DIM;
-        const outline = intersects ? HAZARD_OUTLINE_FULL : HAZARD_OUTLINE_DIM;
+        const outlineColor = intersects
+          ? createPulsingOutline()
+          : new ConstantProperty(HAZARD_OUTLINE_DIM);
 
         const hierarchy = new PolygonHierarchy(
           Cartesian3.fromDegreesArray(coords),
         );
 
-        const extrudedHeightProp = new ConstantProperty(maxM);
+        const shouldExtrude = selectedFlight != null;
 
         return (
           <Entity
@@ -77,17 +122,18 @@ export const HazardLayer = memo(function HazardLayer({
               hierarchy,
               material: new ColorMaterialProperty(fill),
               outline: true,
-              outlineColor: outline,
-              height: minM,
-              extrudedHeight: extrudedHeightProp,
+              outlineColor: outlineColor,
+              height: shouldExtrude ? minM : 0,
+              extrudedHeight: shouldExtrude ? maxM : undefined,
               heightReference: HeightReference.NONE,
               fill: true,
               arcType: ArcType.GEODESIC,
+              distanceDisplayCondition: HAZARD_NEAR_FAR,
             }}
           />
         );
       }),
-    [sigmets, flightAltFt],
+    [sigmets, flightAltFt, viewportBbox, selectedFlight],
   );
 
   return <>{entities}</>;

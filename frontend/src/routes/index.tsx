@@ -1,4 +1,4 @@
-import { useMemo, useState, useCallback, useRef } from "react";
+import { useMemo, useState, useCallback, useRef, useEffect } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import type { Viewer as CesiumViewer } from "cesium";
 import { CesiumGlobe } from "@/components/CesiumGlobe";
@@ -8,6 +8,9 @@ import { FlightTrailLayer } from "@/components/FlightTrailLayer";
 import { RouteLineLayer } from "@/components/RouteLineLayer";
 import { FlightPredictLayer } from "@/components/FlightPredictLayer";
 import { RerouteLayer } from "@/components/RerouteLayer";
+import { RadarSweepLayer } from "@/components/RadarSweepLayer";
+import { VerticalProfileView } from "@/components/VerticalProfileView";
+import { BootSequence } from "@/components/BootSequence";
 import { AirportsLayer } from "@/components/AirportsLayer";
 import { FlightDetailPanel } from "@/components/FlightDetailPanel";
 import { GlobeControlBar, type LayerVisibility } from "@/components/GlobeControlBar";
@@ -49,6 +52,8 @@ function GlobePage() {
   const [layers, setLayers] = useState<LayerVisibility>(DEFAULT_LAYERS);
   const [sceneMode, setSceneMode] = useState<"3D" | "2D">("3D");
   const [autoRotate, setAutoRotate] = useState(false);
+  const [bootElapsed, setBootElapsed] = useState(false);
+  const [bootForceTimeout, setBootForceTimeout] = useState(false);
 
   const searchInputRef = useRef<HTMLInputElement>(null);
 
@@ -149,8 +154,27 @@ function GlobePage() {
 
   const highRiskCount = risks.filter((r) => r.risk === "HIGH").length;
 
+  useEffect(() => {
+    const t = setTimeout(() => setBootElapsed(true), 2200);
+    return () => clearTimeout(t);
+  }, []);
+
+  useEffect(() => {
+    const t = setTimeout(() => setBootForceTimeout(true), 15000);
+    return () => clearTimeout(t);
+  }, []);
+
+  const flightsLoaded = !flightsQuery.isLoading && (flightsQuery.data?.flights?.length ?? 0) > 0;
+  const bootReady = (bootElapsed && !!viewer && flightsLoaded) || bootForceTimeout;
+
   return (
     <>
+      <BootSequence
+        ready={bootReady}
+        flightCount={flightsQuery.data?.flights.length ?? 0}
+        sigmetCount={sigmets.length}
+        airportCount={airports.length}
+      />
       <CesiumGlobe onReady={setViewer}>
         {layers.flights && (
           <FlightLayer
@@ -163,10 +187,17 @@ function GlobePage() {
         )}
         {layers.airports && <AirportsLayer airports={airports} viewer={viewer} />}
         {layers.sigmets && (
-          <HazardLayer sigmets={sigmets} selectedFlight={selectedFlight} />
+          <HazardLayer
+            sigmets={sigmets}
+            selectedFlight={selectedFlight}
+            viewportBbox={bbox}
+          />
         )}
         {layers.trails && selectedId && (
           <FlightTrailLayer trail={trailQuery.data?.trail ?? []} icao24={selectedId} />
+        )}
+        {layers.trails && selectedFlight && (
+          <RadarSweepLayer flight={selectedFlight} />
         )}
         {layers.routes && (
           <RouteLineLayer route={routeQuery.data ?? null} flight={selectedFlight} />
@@ -228,6 +259,13 @@ function GlobePage() {
         onClose={handleDeselect}
         onFollow={() => setFollowMode((v) => !v)}
         followMode={followMode}
+      />
+
+      <VerticalProfileView
+        flight={selectedFlight}
+        route={routeQuery.data ?? null}
+        trail={trailQuery.data?.trail ?? []}
+        sigmets={sigmets}
       />
 
       <GlobeControlBar

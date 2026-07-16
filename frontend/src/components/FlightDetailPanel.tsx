@@ -49,21 +49,21 @@ export function FlightDetailPanel({
   const suffix = flight.icao24.slice(-4).toUpperCase();
 
   return (
-    <div className="absolute right-[18rem] top-12 z-30 w-72 border border-hud-grid/25 bg-hud-charcoal/95 backdrop-blur-md sm:w-80">
-      <div className="flex items-center justify-between border-b border-hud-grid/20 px-3 py-2">
+    <div className="absolute right-[18rem] top-12 z-30 w-72 border border-hud-border bg-hud-charcoal/95 backdrop-blur-md sm:w-80">
+      <div className="flex items-center justify-between border-b border-hud-border px-3 py-2">
         <div className="flex items-center gap-1.5">
           <Crosshair className={`size-3 ${isWarn ? "text-hud-warn" : "text-hud-grid"}`} />
-          <span className={`font-mono text-[11px] font-bold tracking-wider ${isWarn ? "text-hud-warn" : "text-hud-grid"}`}>
+          <span className={`font-mono text-[13px] font-bold tracking-wider ${isWarn ? "text-hud-warn" : "text-hud-grid"}`}>
             {cs} {suffix}
           </span>
         </div>
         <div className="flex items-center gap-1">
           <button
             onClick={onFollow}
-            className={`border px-2 py-0.5 font-mono text-[9px] tracking-wider transition-colors ${
+            className={`border px-2 py-0.5 font-mono text-[11px] tracking-wider transition-colors ${
               followMode
                 ? "border-hud-grid bg-hud-grid/15 text-hud-grid"
-                : "border-hud-grid/25 text-hud-dim hover:border-hud-grid/50"
+                : "border-hud-border text-hud-dim hover:border-hud-grid/50"
             }`}
           >
             {followMode ? "LOCK" : "FOLLOW"}
@@ -72,7 +72,7 @@ export function FlightDetailPanel({
             onClick={() => setExpanded((v) => !v)}
             className="text-hud-dim transition-colors hover:text-hud-grid"
           >
-            <span className="font-mono text-[9px]">{expanded ? "[-]" : "[+]"}</span>
+            <span className="font-mono text-[11px]">{expanded ? "[-]" : "[+]"}</span>
           </button>
           <button
             onClick={onClose}
@@ -151,13 +151,20 @@ export function FlightDetailPanel({
               accent="warn"
             />
           )}
+          <div className="border-b border-hud-border px-3 py-1.5 font-mono text-[10px] leading-relaxed text-hud-dim">
+            {riskLevel === "HIGH"
+              ? "Inside a SIGMET area and altitude band now."
+              : riskLevel === "MEDIUM"
+                ? "Near a hazard (<50km). Could reach it soon."
+                : "Clear of all active hazards."}
+          </div>
 
           {route && (route.departure || route.arrival) && (
-            <div className="border-t border-hud-grid/15 px-3 py-2">
-              <div className="mb-1 font-mono text-[8px] tracking-[0.16em] text-hud-dim">
+            <div className="border-t border-hud-border px-3 py-2">
+              <div className="mb-1 font-mono text-[10px] tracking-[0.16em] text-hud-dim">
                 ROUTE
               </div>
-              <div className="font-mono text-[10px] text-hud-ink">
+              <div className="font-mono text-[12px] text-hud-ink">
                 <span className="text-hud-grid">
                   {route.departure_airport?.iata ?? route.departure ?? "---"}
                 </span>
@@ -167,12 +174,12 @@ export function FlightDetailPanel({
                 </span>
               </div>
               {route.departure_airport && (
-                <div className="mt-1 font-mono text-[9px] text-hud-dim">
+                <div className="mt-1 font-mono text-[11px] text-hud-dim">
                   DEP: {route.departure_airport.name}
                 </div>
               )}
               {route.arrival_airport && (
-                <div className="font-mono text-[9px] text-hud-dim">
+                <div className="font-mono text-[11px] text-hud-dim">
                   ARR: {route.arrival_airport.name}
                 </div>
               )}
@@ -180,8 +187,8 @@ export function FlightDetailPanel({
           )}
 
           {risk?.sigmet_id && (
-            <div className="border-t border-hud-grid/15 px-3 py-2">
-              <div className="font-mono text-[9px] text-hud-warn">
+            <div className="border-t border-hud-border px-3 py-2">
+              <div className="font-mono text-[11px] text-hud-warn">
                 SIGMET: {risk.sigmet_id}
               </div>
             </div>
@@ -221,14 +228,14 @@ function StatRow({
           ? "text-hud-dim"
           : "text-hud-ink";
   return (
-    <div className="flex items-center justify-between border-b border-hud-grid/8 px-3 py-1.5">
+    <div className="flex items-center justify-between border-b border-hud-border px-3 py-1.5">
       <div className="flex items-center gap-1.5">
         <Icon className="size-2.5 text-hud-dim" />
-        <span className="font-mono text-[8px] tracking-[0.14em] text-hud-dim">
+        <span className="font-mono text-[10px] tracking-[0.14em] text-hud-dim">
           {label}
         </span>
       </div>
-      <span className={`font-mono text-[10px] font-medium ${colorClass}`}>
+      <span className={`font-mono text-[12px] font-medium ${colorClass}`}>
         {value}
       </span>
     </div>
@@ -251,10 +258,10 @@ function RerouteOptions({
   if (options.length === 0) return null;
 
   return (
-    <div className="border-t border-hud-grid/15 px-3 py-2">
+    <div className="border-t border-hud-border px-3 py-2">
       <div className="mb-1.5 flex items-center gap-1.5">
         <Route className="size-2.5 text-hud-grid" />
-        <span className="font-mono text-[8px] font-bold tracking-[0.16em] text-hud-grid">
+        <span className="font-mono text-[10px] font-bold tracking-[0.16em] text-hud-grid">
           REROUTE ADVISOR
         </span>
       </div>
@@ -262,15 +269,15 @@ function RerouteOptions({
         {options.map((opt) => (
           <div
             key={opt.id}
-            className="flex items-center justify-between border border-hud-grid/15 bg-hud-grid/5 px-2 py-1"
+            className="flex items-center justify-between border border-hud-border bg-hud-grid/5 px-2 py-1"
           >
-            <span className="font-mono text-[9px] tracking-wider text-hud-grid">
+            <span className="font-mono text-[11px] tracking-wider text-hud-grid">
               {opt.side} {opt.offset_nm}NM
             </span>
-            <span className="font-mono text-[9px] text-hud-ink">
+            <span className="font-mono text-[11px] text-hud-ink">
               +{Math.round(opt.extra_km)}km
             </span>
-            <span className="font-mono text-[9px] text-hud-warn">
+            <span className="font-mono text-[11px] text-hud-warn">
               +{Math.ceil(opt.extra_min)}min
             </span>
           </div>
