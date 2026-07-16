@@ -30,6 +30,9 @@ struct Inner {
     flights: RwLock<Vec<FlightVector>>,
     sigmets: RwLock<Vec<HazardPolygon>>,
     trails: DashMap<String, Vec<TrailPoint>>,
+    flights_updated_at: RwLock<Option<u64>>,
+    sigmets_updated_at: RwLock<Option<u64>>,
+    sse_subscribers: std::sync::atomic::AtomicU64,
 }
 
 impl AppState {
@@ -46,6 +49,9 @@ impl AppState {
                 flights: RwLock::new(Vec::new()),
                 sigmets: RwLock::new(Vec::new()),
                 trails: DashMap::new(),
+                flights_updated_at: RwLock::new(None),
+                sigmets_updated_at: RwLock::new(None),
+                sse_subscribers: std::sync::atomic::AtomicU64::new(0),
             }),
         }
     }
@@ -80,6 +86,11 @@ impl AppState {
             Ok(flights) => {
                 self.append_trails(&flights);
                 *self.inner.flights.write().await = flights;
+                let now = SystemTime::now()
+                    .duration_since(UNIX_EPOCH)
+                    .unwrap_or_default()
+                    .as_secs();
+                *self.inner.flights_updated_at.write().await = Some(now);
             }
             Err(e) => {
                 tracing::error!("failed to refresh flights: {e}");
@@ -179,11 +190,47 @@ impl AppState {
         match self.inner.aviationweather.fetch_sigmets().await {
             Ok(sigmets) => {
                 *self.inner.sigmets.write().await = sigmets;
+                let now = SystemTime::now()
+                    .duration_since(UNIX_EPOCH)
+                    .unwrap_or_default()
+                    .as_secs();
+                *self.inner.sigmets_updated_at.write().await = Some(now);
             }
             Err(e) => {
                 tracing::error!("failed to refresh sigmets: {e}");
             }
         }
+    }
+
+    pub async fn flights_updated_at(&self) -> Option<u64> {
+        *self.inner.flights_updated_at.read().await
+    }
+
+    pub async fn sigmets_updated_at(&self) -> Option<u64> {
+        *self.inner.sigmets_updated_at.read().await
+    }
+
+    pub fn sse_subscribe(&self) -> u64 {
+        self.inner
+            .sse_subscribers
+            .fetch_add(1, std::sync::atomic::Ordering::Relaxed)
+            + 1
+    }
+
+    pub fn sse_unsubscribe(&self) {
+        self.inner
+            .sse_subscribers
+            .fetch_sub(1, std::sync::atomic::Ordering::Relaxed);
+    }
+
+    pub fn sse_subscriber_count(&self) -> u64 {
+        self.inner
+            .sse_subscribers
+            .load(std::sync::atomic::Ordering::Relaxed)
+    }
+
+    pub fn airports_count(&self) -> usize {
+        self.inner.airports.count()
     }
 
     pub async fn risk_assessments(&self) -> Vec<RiskAssessment> {

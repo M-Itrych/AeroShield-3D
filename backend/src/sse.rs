@@ -5,9 +5,24 @@ use futures_util::stream::{self, StreamExt};
 use std::convert::Infallible;
 use std::time::Duration;
 
+struct SubscriberGuard {
+    state: AppState,
+}
+
+impl Drop for SubscriberGuard {
+    fn drop(&mut self) {
+        self.state.sse_unsubscribe();
+    }
+}
+
 pub async fn risk_stream(
     State(state): State<AppState>,
 ) -> Sse<impl futures_util::Stream<Item = Result<Event, Infallible>>> {
+    state.sse_subscribe();
+    let guard = SubscriberGuard {
+        state: state.clone(),
+    };
+
     let stream = stream::unfold(state, move |state| async move {
         tokio::time::sleep(Duration::from_secs(5)).await;
         let risks = state.risk_assessments().await;
@@ -31,7 +46,11 @@ pub async fn risk_stream(
 
         Some((stream::iter(events), state))
     })
-    .flat_map(|events| events);
+    .flat_map(|events| events)
+    .chain(stream::once(async move {
+        drop(guard);
+        Ok::<Event, Infallible>(Event::default())
+    }));
 
     Sse::new(stream).keep_alive(
         KeepAlive::new()

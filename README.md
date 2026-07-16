@@ -8,7 +8,7 @@
   A web-based <strong>3D digital twin of global aviation airspace</strong> that visualizes
   live flights and overlays volumetric weather hazard zones (SIGMETs), flagging aircraft
   on a collision course with severe weather. Built with a Rust backend and React + CesiumJS frontend
-  in a dark cyber-radar visual style.
+  in a dark tactical HUD visual style.
 </p>
 
 <p align="center">
@@ -33,11 +33,11 @@ AeroShield 3D is a **3D digital twin** of active global airspace that:
 
 - Renders live aircraft positions on a CesiumJS globe as 3D markers with heading orientation.
 - Parses **active SIGMET polygons** from AviationWeather.gov and extrudes them as translucent
-  crimson volumetric zones with min/max altitude bands.
+  orange volumetric zones with min/max altitude bands.
 - Runs a Rust spatial engine that flags flights **inside** a hazard polygon AND within its altitude
   band as `HIGH` risk, or projected to enter within 50 km / 5 min as `MEDIUM`.
 - Streams those risk assessments to the frontend via **Server-Sent Events**, so dispatchers see
-  at-risk flights glow red in real time — no manual cross-referencing required.
+  at-risk flights glow orange in real time — no manual cross-referencing required.
 
 ## Architecture
 
@@ -76,23 +76,29 @@ AeroShield 3D is a **3D digital twin** of active global airspace that:
 
 ### Frontend — React + Vite + CesiumJS
 
-- **3D globe**: CesiumJS via resium — dark imagery, no chrome, CRT scanline overlay.
+- **3D globe**: CesiumJS via resium — dark imagery, no chrome, minimalist charcoal sphere.
 - **State**: TanStack Query (60s refetch) hydrates [`flights`], [`sigmets`] caches; SSE hydrates [`risk-flights`].
 - **Routing**: TanStack Router file-based — `/`, `/flight/$id`, `/airport/$icao`.
-- **UI**: shadcn/ui components on the dark cyber-radar theme (near-black, cyan-green CRT glow, crimson hazards).
-- **Pieces**: `CesiumGlobe`, `FlightLayer` (billboard sprites w/ heading), `HazardLayer` (extruded translucent red polygons), `RiskSubscriber` (EventSource → query cache).
+- **UI**: shadcn/ui components on the dark tactical HUD theme (near-black space, lime safe-tracks, orange hazards).
+- **Pieces**: `CesiumGlobe`, `FlightLayer` (billboard sprites w/ heading), `HazardLayer` (extruded translucent orange volumes), `RiskSubscriber` (EventSource → query cache), `RerouteLayer` (detour corridors).
 
-## Visual Style — Dark Cyber-Radar
+## Visual Style — Tactical HUD / Cybernetic Telemetry
 
-| Element        | Color                                             |
-| -------------- | ------------------------------------------------- |
-| Background     | `#05070a` — near-black radar screen               |
-| Grid / accent  | `#12ffaa` — subtle cyan-green CRT glow             |
-| Hazard zones   | `#ff3358` alpha 0.18 — crimson volumetric translucent |
-| At-risk flights| pulsing red glow ring around sprite               |
-| Safe flights   | amber/off-white plane icons                        |
-| Borders        | `border-cyan-500/15` — subtle                      |
-| Mono font      | `ui-monospace, "JetBrains Mono", monospace`        |
+| Element          | Color                                             |
+| ---------------- | ------------------------------------------------- |
+| Background       | `#08080a` — near-black space star-field           |
+| Globe charcoal   | `#121315` — minimalist dark sphere                |
+| Continents       | `#1c1d21` — flat muted landmasses                 |
+| Electric lime    | `#39ff14` — safe tracks, routes, active UI states  |
+| Warning orange   | `#ff5f1f` — hazards, at-risk tracks, SIGMETs      |
+| Ink (text)       | `#b8c4cc` — body text, label values                |
+| Dim (muted)      | `#5a6770` — captions, metadata, placeholders       |
+| Borders          | `border-hud-grid/20` — ultra-thin neon-tinted      |
+| Mono font        | `ui-monospace, "JetBrains Mono", monospace`        |
+
+Two-neon discipline: the only saturated colors are lime `#39ff14` and orange
+`#ff5f1f`. No other accent hues are permitted. See `AGENTS.md §7` for the full
+canonical palette and rules.
 
 ## Data Sources (Free, No-Key)
 

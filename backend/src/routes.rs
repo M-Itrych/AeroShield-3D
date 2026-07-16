@@ -12,6 +12,8 @@ use crate::state::AppState;
 pub fn router() -> Router<AppState> {
     Router::new()
         .route("/healthz", get(healthz))
+        .route("/stats", get(get_stats))
+        .route("/metrics", get(get_metrics))
         .route("/api/flights", get(list_flights))
         .route("/api/flights/:icao24", get(get_flight))
         .route("/api/flights/:icao24/trail", get(get_flight_trail))
@@ -88,7 +90,7 @@ async fn list_flights(State(state): State<AppState>, Query(q): Query<FlightsQuer
         })
         .collect();
 
-    Json(json!({ "flights": filtered }))
+    Json(json!({ "flights": filtered, "updated_at": state.flights_updated_at().await }))
 }
 
 async fn list_sigmets(State(state): State<AppState>) -> Json<Value> {
@@ -146,4 +148,54 @@ async fn get_airport_metar(State(state): State<AppState>, Path(icao): Path<Strin
         Some(metar) => Json(json!(metar)),
         None => Json(json!({ "icao": icao, "error": "metar not available" })),
     }
+}
+
+async fn get_stats(State(state): State<AppState>) -> Json<Value> {
+    let flights = state.flights().await;
+    let sigmets = state.sigmets().await;
+    let risks = state.risk_assessments().await;
+    let high_count = risks.iter().filter(|r| r.risk.as_str() == "HIGH").count();
+    let medium_count = risks.iter().filter(|r| r.risk.as_str() == "MEDIUM").count();
+
+    Json(json!({
+        "flights_tracked": flights.len(),
+        "sigmets_active": sigmets.len(),
+        "risk_high": high_count,
+        "risk_medium": medium_count,
+        "sse_subscribers": state.sse_subscriber_count(),
+        "airports_indexed": state.airports_count(),
+        "flights_updated_at": state.flights_updated_at().await,
+        "sigmets_updated_at": state.sigmets_updated_at().await,
+    }))
+}
+
+async fn get_metrics(State(state): State<AppState>) -> String {
+    let flights = state.flights().await.len();
+    let sigmets = state.sigmets().await.len();
+    let risks = state.risk_assessments().await;
+    let high = risks.iter().filter(|r| r.risk.as_str() == "HIGH").count();
+    let medium = risks.iter().filter(|r| r.risk.as_str() == "MEDIUM").count();
+    let sse = state.sse_subscriber_count();
+    let airports = state.airports_count();
+
+    format!(
+        "# HELP aeroshield_flights_tracked Number of flights currently tracked\n\
+         # TYPE aeroshield_flights_tracked gauge\n\
+         aeroshield_flights_tracked {flights}\n\
+         # HELP aeroshield_sigmets_active Number of active SIGMETs\n\
+         # TYPE aeroshield_sigmets_active gauge\n\
+         aeroshield_sigmets_active {sigmets}\n\
+         # HELP aeroshield_risk_high Number of HIGH-risk flights\n\
+         # TYPE aeroshield_risk_high gauge\n\
+         aeroshield_risk_high {high}\n\
+         # HELP aeroshield_risk_medium Number of MEDIUM-risk flights\n\
+         # TYPE aeroshield_risk_medium gauge\n\
+         aeroshield_risk_medium {medium}\n\
+         # HELP aeroshield_sse_subscribers Number of active SSE subscribers\n\
+         # TYPE aeroshield_sse_subscribers gauge\n\
+         aeroshield_sse_subscribers {sse}\n\
+         # HELP aeroshield_airports_indexed Number of airports in the index\n\
+         # TYPE aeroshield_airports_indexed gauge\n\
+         aeroshield_airports_indexed {airports}\n"
+    )
 }
