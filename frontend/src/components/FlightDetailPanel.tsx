@@ -140,6 +140,14 @@ export function FlightDetailPanel({
             value={riskLevel}
             accent={isHigh ? "warn" : isWarn ? "warn" : "grid"}
           />
+          {risk?.minutes_to_impact != null && risk.minutes_to_impact > 0 && (
+            <StatRow
+              icon={Crosshair}
+              label="TIME TO IMPACT"
+              value={`${Math.ceil(risk.minutes_to_impact)} MIN`}
+              accent="warn"
+            />
+          )}
 
           {route && (route.departure || route.arrival) && (
             <div className="border-t border-hud-grid/15 px-3 py-2">

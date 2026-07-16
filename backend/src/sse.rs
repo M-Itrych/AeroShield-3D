@@ -23,6 +23,7 @@ pub async fn risk_stream(
                     "alt_ft": r.alt_ft,
                     "risk": r.risk,
                     "sigmet_id": r.sigmet_id,
+                    "minutes_to_impact": r.minutes_to_impact,
                 });
                 Ok(Event::default().event("risk").data(data.to_string()))
             })

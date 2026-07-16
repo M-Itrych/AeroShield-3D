@@ -42,17 +42,20 @@ const LABEL_PADDING = new Cartesian2(4, 2);
 const LABEL_NEAR_FAR = { near: 0, far: 3_000_000 } as const;
 const POINT_NEAR_FAR = { near: 0, far: 60_000_000 } as const;
 
-function buildRiskMap(risks?: RiskAssessment[]): Map<string, string> {
-  const m = new Map<string, string>();
-  if (risks) for (const r of risks) m.set(r.flight, r.risk);
+function buildRiskMap(risks?: RiskAssessment[]): Map<string, RiskAssessment> {
+  const m = new Map<string, RiskAssessment>();
+  if (risks) for (const r of risks) m.set(r.flight, r);
   return m;
 }
 
-function tacticalLabel(f: FlightVector): string {
+function tacticalLabel(f: FlightVector, risk?: RiskAssessment): string {
   const cs = f.callsign?.trim();
   const suffix = f.icao24.slice(-4).toUpperCase();
-  if (cs) return `${cs} ${suffix}`;
-  return `SYS-${f.icao24.slice(0, 6).toUpperCase()}`;
+  const base = cs ? `${cs} ${suffix}` : `SYS-${f.icao24.slice(0, 6).toUpperCase()}`;
+  if (risk?.minutes_to_impact != null && risk.minutes_to_impact > 0) {
+    return `${base} T${Math.ceil(risk.minutes_to_impact)}M`;
+  }
+  return base;
 }
 
 function dedupeByIcao(flights: FlightVector[]): FlightVector[] {
@@ -99,7 +102,7 @@ export function FlightLayer({
     const rest: FlightVector[] = [];
 
     for (const f of inView) {
-      const r = riskMap.get(f.icao24) ?? "NONE";
+      const r = riskMap.get(f.icao24)?.risk ?? "NONE";
       if (r === "HIGH") high.push(f);
       else if (r === "MEDIUM") med.push(f);
       else rest.push(f);
@@ -121,7 +124,8 @@ export function FlightLayer({
       {visible.map((f) => {
         const alt = f.baro_altitude ?? 10000;
         const position = Cartesian3.fromDegrees(f.longitude, f.latitude, alt);
-        const riskLevel = riskMap.get(f.icao24) ?? "NONE";
+        const flightRisk = riskMap.get(f.icao24);
+        const riskLevel = flightRisk?.risk ?? "NONE";
         const isHigh = riskLevel === "HIGH";
         const isWarn = isHigh || riskLevel === "MEDIUM";
         const isSelected = selectedId === f.icao24;
@@ -157,7 +161,7 @@ export function FlightLayer({
             label={
               showLabel
                 ? {
-                    text: tacticalLabel(f),
+                    text: tacticalLabel(f, flightRisk),
                     font: '10px "JetBrains Mono", ui-monospace, monospace',
                     fillColor: LABEL_FILL,
                     outlineColor: LABEL_OUTLINE,
