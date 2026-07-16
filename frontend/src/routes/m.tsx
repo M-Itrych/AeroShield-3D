@@ -11,6 +11,7 @@ import { FlightPredictLayer } from "@/components/FlightPredictLayer";
 import { RerouteLayer } from "@/components/RerouteLayer";
 import { RadarSweepLayer } from "@/components/RadarSweepLayer";
 import { OffscreenIndicator } from "@/components/OffscreenIndicator";
+import { BootSequence } from "@/components/BootSequence";
 import { useFlights } from "@/hooks/use-flights";
 import { useSigmets } from "@/hooks/use-sigmets";
 import { useAirports } from "@/hooks/use-airports";
@@ -39,6 +40,12 @@ function MobileGlobePage() {
   const [activeTab, setActiveTab] = useState<SheetTab>("tracks");
   const [sheetHeight, setSheetHeight] = useState<SheetHeight>("half");
   const [autoRotate, setAutoRotate] = useState(false);
+  const [bootElapsed, setBootElapsed] = useState(false);
+
+  useEffect(() => {
+    const t = setTimeout(() => setBootElapsed(true), 2200);
+    return () => clearTimeout(t);
+  }, []);
 
   const bbox = useViewportBbox(viewer);
   const flightsQuery = useFlights("ALL");
@@ -112,6 +119,12 @@ function MobileGlobePage() {
 
   return (
     <>
+      <BootSequence
+        ready={bootElapsed && (!!viewer || !flightsQuery.isLoading)}
+        flightCount={allFlights.length}
+        sigmetCount={sigmets.length}
+        airportCount={airports.length}
+      />
       <MobileHudBar
         flightCount={allFlights.length}
         sigmetCount={sigmets.length}

@@ -1,4 +1,4 @@
-import { useMemo, useState, useCallback, useRef } from "react";
+import { useMemo, useState, useCallback, useRef, useEffect } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import type { Viewer as CesiumViewer } from "cesium";
 import { CesiumGlobe } from "@/components/CesiumGlobe";
@@ -11,6 +11,7 @@ import { RerouteLayer } from "@/components/RerouteLayer";
 import { RadarSweepLayer } from "@/components/RadarSweepLayer";
 import { VerticalProfileView } from "@/components/VerticalProfileView";
 import { OffscreenIndicator } from "@/components/OffscreenIndicator";
+import { BootSequence } from "@/components/BootSequence";
 import { AirportsLayer } from "@/components/AirportsLayer";
 import { FlightDetailPanel } from "@/components/FlightDetailPanel";
 import { GlobeControlBar, type LayerVisibility } from "@/components/GlobeControlBar";
@@ -52,6 +53,7 @@ function GlobePage() {
   const [layers, setLayers] = useState<LayerVisibility>(DEFAULT_LAYERS);
   const [sceneMode, setSceneMode] = useState<"3D" | "2D">("3D");
   const [autoRotate, setAutoRotate] = useState(false);
+  const [bootElapsed, setBootElapsed] = useState(false);
 
   const searchInputRef = useRef<HTMLInputElement>(null);
 
@@ -152,8 +154,21 @@ function GlobePage() {
 
   const highRiskCount = risks.filter((r) => r.risk === "HIGH").length;
 
+  useEffect(() => {
+    const t = setTimeout(() => setBootElapsed(true), 2200);
+    return () => clearTimeout(t);
+  }, []);
+
+  const bootReady = bootElapsed && (!!viewer || !flightsQuery.isLoading);
+
   return (
     <>
+      <BootSequence
+        ready={bootReady}
+        flightCount={flightsQuery.data?.flights.length ?? 0}
+        sigmetCount={sigmets.length}
+        airportCount={airports.length}
+      />
       <CesiumGlobe onReady={setViewer}>
         {layers.flights && (
           <FlightLayer
