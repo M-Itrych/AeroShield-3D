@@ -105,7 +105,7 @@ export function FlightsPanel({
             <button
               key={r}
               onClick={() => onRiskFilterChange?.(r === "MED" ? "MEDIUM" : r)}
-              className={`flex-1 border px-1 py-0.5 font-mono text-[11px] tracking-wider transition-colors ${
+              className={`flex-1 border px-1 py-0.5 font-mono text-[14px] tracking-wider transition-colors ${
                 (riskFilter === "MEDIUM" ? "MED" : riskFilter) === r
                   ? r === "HIGH"
                     ? "border-hud-warn bg-hud-warn/10 text-hud-warn"
@@ -127,7 +127,7 @@ export function FlightsPanel({
             </span>
             <button
               onClick={() => onFollowModeChange?.(!followMode)}
-              className={`border px-2 py-0.5 font-mono text-[11px] tracking-wider transition-colors ${
+              className={`border px-2 py-0.5 font-mono text-[14px] tracking-wider transition-colors ${
                 followMode
                   ? "border-hud-grid bg-hud-grid/15 text-hud-grid"
                   : "border-hud-border text-hud-dim hover:border-hud-grid/50"
@@ -211,7 +211,7 @@ export function FlightsPanel({
                       </span>
                     </div>
                     <span
-                      className={`border px-1.5 py-0.5 font-mono text-[11px] tracking-wider ${
+                      className={`border px-1.5 py-0.5 font-mono text-[14px] tracking-wider ${
                         high
                           ? "border-hud-warn text-hud-warn"
                           : warn

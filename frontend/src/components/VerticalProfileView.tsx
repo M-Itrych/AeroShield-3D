@@ -152,7 +152,7 @@ export function VerticalProfileView({
       >
         <div className="flex items-center gap-1.5">
           <Mountain className="size-3 text-hud-grid" />
-          <span className="font-mono text-[11px] font-bold tracking-[0.16em] text-hud-grid">
+          <span className="font-mono text-[14px] font-bold tracking-[0.16em] text-hud-grid">
             VERTICAL PROFILE
           </span>
         </div>
@@ -268,7 +268,7 @@ export function VerticalProfileView({
             />
           </svg>
 
-          <div className="flex items-center justify-between px-1 pt-1 font-mono text-[10px] text-hud-dim">
+          <div className="flex items-center justify-between px-1 pt-1 font-mono text-[13px] text-hud-dim">
             <span>0 km</span>
             <span className="text-hud-grid">
               CUR: FL{Math.round(data.currentAltFt / 100)}

@@ -16,7 +16,7 @@
     --secondary: 220 14% 94%;
     --secondary-foreground: 220 12% 14%;
     --muted: 220 14% 94%;
-    --muted-foreground: 220 8% 40%;
+    --muted-foreground: 220 10% 32%;
     --accent: 12 80% 58%;
     --accent-foreground: 0 0% 100%;
     --destructive: 0 72% 51%;
@@ -34,8 +34,8 @@
     --hud-warn: 12 80% 58%;      /* accent2: hazard / warning */
     --hud-crit: 0 72% 51%;       /* critical: HIGH risk only */
     --hud-border: 220 12% 88%;   /* neutral structural border */
-    --hud-ink: 220 12% 14%;      /* primary text */
-    --hud-dim: 220 8% 40%;       /* muted text */
+    --hud-ink: 220 18% 12%;      /* primary text */
+    --hud-dim: 220 10% 34%;      /* muted text (darker for contrast on light) */
   }
 
   [data-theme="dark"] {
@@ -51,7 +51,7 @@
     --secondary: 222 8% 12%;
     --secondary-foreground: 215 16% 78%;
     --muted: 222 8% 12%;
-    --muted-foreground: 215 10% 45%;
+    --muted-foreground: 215 12% 62%;
     --accent: 12 78% 60%;
     --accent-foreground: 222 10% 7%;
     --destructive: 0 70% 62%;
@@ -67,9 +67,9 @@
     --hud-grid: 156 58% 50%;
     --hud-warn: 12 78% 60%;
     --hud-crit: 0 70% 62%;
-    --hud-border: 220 10% 16%;
-    --hud-ink: 215 16% 78%;
-    --hud-dim: 215 10% 45%;
+    --hud-border: 220 12% 20%;
+    --hud-ink: 215 18% 84%;
+    --hud-dim: 215 10% 62%;
   }
 }
 
@@ -90,6 +90,9 @@
     overflow: hidden;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+  }
+  html {
+    font-size: 17px;
   }
 }
 

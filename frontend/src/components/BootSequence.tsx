@@ -177,7 +177,7 @@ export function BootSequence({
           >
             AEROSHIELD
           </h1>
-          <span className="font-mono text-[8px] tracking-[0.16em] text-hud-dim">
+          <span className="font-mono text-[12px] tracking-[0.16em] text-hud-dim">
             TACTICAL TELEMETRY SYSTEM
           </span>
         </div>
@@ -186,7 +186,7 @@ export function BootSequence({
           {checks.map((check) => (
             <div
               key={check.label}
-              className="flex items-center justify-between font-mono text-[8px] tracking-wider"
+              className="flex items-center justify-between font-mono text-[12px] tracking-wider"
             >
               <span className={check.done ? "text-hud-grid" : "text-hud-dim"}>
                 {check.label}
@@ -202,26 +202,26 @@ export function BootSequence({
           ))}
         </div>
 
-        <div className="flex items-center gap-4 font-mono text-[10px]">
+        <div className="flex items-center gap-4 font-mono text-[13px]">
           <div className="flex flex-col items-center">
             <span className="font-bold tabular-nums text-hud-grid">
               {String(displayedFlights).padStart(4, "0")}
             </span>
-            <span className="text-[7px] tracking-wider text-hud-dim">TRACKS</span>
+            <span className="text-[12px] tracking-wider text-hud-dim">TRACKS</span>
           </div>
           <span className="h-6 w-px bg-hud-grid/15" />
           <div className="flex flex-col items-center">
             <span className="font-bold tabular-nums text-hud-warn">
               {String(displayedSigmets).padStart(2, "0")}
             </span>
-            <span className="text-[7px] tracking-wider text-hud-dim">HAZARDS</span>
+            <span className="text-[12px] tracking-wider text-hud-dim">HAZARDS</span>
           </div>
           <span className="h-6 w-px bg-hud-grid/15" />
           <div className="flex flex-col items-center">
             <span className="font-bold tabular-nums text-hud-ink">
               {String(airportCount).padStart(5, "0")}
             </span>
-            <span className="text-[7px] tracking-wider text-hud-dim">AIRPORTS</span>
+            <span className="text-[12px] tracking-wider text-hud-dim">AIRPORTS</span>
           </div>
         </div>
       </div>

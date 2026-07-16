@@ -67,10 +67,10 @@ export function HazardPanel({
               className="border-b border-hud-border px-3 py-2 text-left transition-colors hover:bg-hud-warn/10"
             >
               <div className="mb-1 flex items-center justify-between">
-                <span className="border border-hud-warn/60 px-1.5 py-0.5 font-mono text-[11px] tracking-wider text-hud-warn">
+                <span className="border border-hud-warn/60 px-1.5 py-0.5 font-mono text-[14px] tracking-wider text-hud-warn">
                   {sig.hazard_type}
                 </span>
-                <span className="font-mono text-[11px] text-hud-dim">
+                <span className="font-mono text-[14px] text-hud-dim">
                   {sig.sigmet_id}
                 </span>
               </div>
@@ -79,7 +79,7 @@ export function HazardPanel({
                 {sig.max_ft && <span>- FL{Math.round(sig.max_ft / 100)}</span>}
                 <span>{sig.points.length}pts</span>
               </div>
-              <div className="mt-1 font-mono text-[10px] leading-relaxed text-hud-dim/80">
+              <div className="mt-1 font-mono text-[13px] leading-relaxed text-hud-dim/80">
                 {hazardHint(sig.hazard_type)}
               </div>
             </button>

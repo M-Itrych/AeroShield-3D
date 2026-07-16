@@ -100,7 +100,7 @@ function MetarCard({
           METAR
         </span>
         <span
-          className={`border px-2 py-0.5 font-mono text-[11px] font-bold tracking-wider ${
+          className={`border px-2 py-0.5 font-mono text-[14px] font-bold tracking-wider ${
             CAT_VARIANT[cat] ?? "border-hud-border text-hud-dim"
           }`}
         >
@@ -114,7 +114,7 @@ function MetarCard({
         </code>
       )}
 
-      <div className="grid grid-cols-3 gap-2 font-mono text-[11px]">
+      <div className="grid grid-cols-3 gap-2 font-mono text-[14px]">
         <MetarStat
           label="TEMP"
           value={metar.temp_c != null ? `${metar.temp_c}C` : "--"}
@@ -161,7 +161,7 @@ function MetarStat({ label, value }: { label: string; value: string }) {
 function InfoRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex flex-col gap-1 border-l border-hud-border pl-3">
-      <span className="font-mono text-[11px] tracking-[0.16em] text-hud-dim">
+      <span className="font-mono text-[14px] tracking-[0.16em] text-hud-dim">
         {label}
       </span>
       <span className="font-mono text-sm text-hud-ink">{value}</span>

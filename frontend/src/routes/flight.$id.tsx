@@ -53,7 +53,7 @@ function InfoRow({
 }) {
   return (
     <div className="flex flex-col gap-1 border-l border-hud-border pl-3">
-      <span className="font-mono text-[11px] tracking-[0.16em] text-hud-dim">
+      <span className="font-mono text-[14px] tracking-[0.16em] text-hud-dim">
         {label}
       </span>
       <span
