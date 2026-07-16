@@ -1,5 +1,4 @@
 import { Outlet, createRootRoute, redirect } from "@tanstack/react-router";
-import { TooltipProvider } from "@/components/ui/tooltip";
 
 function isMobileViewport(): boolean {
   if (typeof window === "undefined") return false;
@@ -16,10 +15,8 @@ export const Route = createRootRoute({
     }
   },
   component: () => (
-    <TooltipProvider delayDuration={200}>
-      <div className="starfield-bg relative h-screen w-screen overflow-hidden">
-        <Outlet />
-      </div>
-    </TooltipProvider>
+    <div className="starfield-bg relative h-screen w-screen overflow-hidden">
+      <Outlet />
+    </div>
   ),
 });
