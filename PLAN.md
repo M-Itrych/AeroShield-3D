@@ -21,19 +21,19 @@ Legend:
 
 ## STAGE 1 — Backend Foundation (Agent: `backend-core`)
 
-- [ ] S1.1 Define Rust data models: `FlightVector`, `Sigmet`, `HazardPolygon`, `RiskAssessment`
-- [ ] S1.2 Implement OpenSky client (`opensky::fetch_states`) with rate-limit-aware scheduler (60s poll, moka cache)
-- [ ] S1.3 Implement AviationWeather.gov SIGMET fetcher (`aviationweather::fetch_sigmets`) parsing raw polygon strings into `Vec<HazardPolygon>` (handle text polygon format like `4100 N 07300 W - 4200 N 07000 W - ...`)
-- [ ] S1.4 Implement airports DB loader (ICAO/IATA JSON cache, in-memory `DashMap`)
-- [ ] S1.5 Implement spatial engine `risk::assess(flight, &sigmets) -> RiskAssessment` using `geo::contains`
-- [ ] S1.6 Implement altitude-band filter (SIGMET min/max ft)
-- [ ] S1.7 Wire Axum routes:
+- [x] S1.1 Define Rust data models: `FlightVector`, `Sigmet`, `HazardPolygon`, `RiskAssessment`
+- [x] S1.2 Implement OpenSky client (`opensky::fetch_states`) with rate-limit-aware scheduler (60s poll, moka cache)
+- [x] S1.3 Implement AviationWeather.gov SIGMET fetcher (`aviationweather::fetch_sigmets`) parsing raw polygon strings into `Vec<HazardPolygon>` (handle text polygon format like `4100 N 07300 W - 4200 N 07000 W - ...`)
+- [x] S1.4 Implement airports DB loader (ICAO/IATA JSON cache, in-memory `DashMap`)
+- [x] S1.5 Implement spatial engine `risk::assess(flight, &sigmets) -> RiskAssessment` using `geo::contains`
+- [x] S1.6 Implement altitude-band filter (SIGMET min/max ft)
+- [x] S1.7 Wire Axum routes:
   - `GET /api/flights` (JSON list, optional `?risk=HIGH`)
   - `GET /api/sigmets` (JSON list)
   - `GET /api/airports/:icao`
   - `GET /api/sse/risk-stream` (SSE, repush every 60s or on risk change)
-- [ ] S1.8 Unit tests: polygon containment, SIGMET parser, risk classifier
-- [ ] S1.9 `cargo fmt && cargo clippy --all-targets -- -D warnings && cargo test`
+- [x] S1.8 Unit tests: polygon containment, SIGMET parser, risk classifier
+- [x] S1.9 `cargo fmt && cargo clippy --all-targets -- -D warnings && cargo test`
 
 ---
 

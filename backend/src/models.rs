@@ -10,6 +10,7 @@ pub struct FlightVector {
     pub baro_altitude: Option<f64>,
     pub velocity: Option<f64>,
     pub heading: Option<f64>,
+    pub on_ground: bool,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -29,6 +30,16 @@ pub enum RiskLevel {
     High,
 }
 
+impl RiskLevel {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            RiskLevel::None => "NONE",
+            RiskLevel::Medium => "MEDIUM",
+            RiskLevel::High => "HIGH",
+        }
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct RiskAssessment {
     pub flight: String,
@@ -38,4 +49,14 @@ pub struct RiskAssessment {
     pub alt_ft: Option<f64>,
     pub risk: RiskLevel,
     pub sigmet_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Airport {
+    pub icao: String,
+    pub iata: Option<String>,
+    pub name: String,
+    pub country: String,
+    pub latitude: f64,
+    pub longitude: f64,
 }

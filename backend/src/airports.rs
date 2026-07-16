@@ -1,14 +1,9 @@
 use dashmap::DashMap;
 
+use crate::models::Airport;
+
 pub struct AirportIndex {
     by_icao: DashMap<String, Airport>,
-}
-
-#[derive(Debug, Clone)]
-pub struct Airport {
-    pub icao: String,
-    pub iata: Option<String>,
-    pub name: String,
 }
 
 impl AirportIndex {
@@ -25,6 +20,10 @@ impl AirportIndex {
     pub fn insert(&self, airport: Airport) {
         self.by_icao.insert(airport.icao.clone(), airport);
     }
+
+    pub fn count(&self) -> usize {
+        self.by_icao.len()
+    }
 }
 
 impl Default for AirportIndex {
@@ -34,5 +33,7 @@ impl Default for AirportIndex {
 }
 
 pub async fn load() -> anyhow::Result<AirportIndex> {
-    Ok(AirportIndex::new())
+    let index = AirportIndex::new();
+    tracing::info!("airports index loaded (empty - stage 4 will add full DB)");
+    Ok(index)
 }

@@ -7,7 +7,8 @@ pub mod opensky;
 pub mod risk;
 pub mod routes;
 pub mod sse;
+pub mod state;
 
-pub fn app() -> Router {
+pub fn app() -> Router<state::AppState> {
     routes::router()
 }
