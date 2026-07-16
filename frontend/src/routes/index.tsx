@@ -9,6 +9,8 @@ import { RouteLineLayer } from "@/components/RouteLineLayer";
 import { FlightPredictLayer } from "@/components/FlightPredictLayer";
 import { RerouteLayer } from "@/components/RerouteLayer";
 import { RadarSweepLayer } from "@/components/RadarSweepLayer";
+import { VerticalProfileView } from "@/components/VerticalProfileView";
+import { OffscreenIndicator } from "@/components/OffscreenIndicator";
 import { AirportsLayer } from "@/components/AirportsLayer";
 import { FlightDetailPanel } from "@/components/FlightDetailPanel";
 import { GlobeControlBar, type LayerVisibility } from "@/components/GlobeControlBar";
@@ -236,6 +238,20 @@ function GlobePage() {
         onClose={handleDeselect}
         onFollow={() => setFollowMode((v) => !v)}
         followMode={followMode}
+      />
+
+      <OffscreenIndicator
+        viewer={viewer}
+        flights={filteredFlights}
+        risks={risks}
+        selectedId={selectedId}
+      />
+
+      <VerticalProfileView
+        flight={selectedFlight}
+        route={routeQuery.data ?? null}
+        trail={trailQuery.data?.trail ?? []}
+        sigmets={sigmets}
       />
 
       <GlobeControlBar

@@ -10,6 +10,7 @@ import { RouteLineLayer } from "@/components/RouteLineLayer";
 import { FlightPredictLayer } from "@/components/FlightPredictLayer";
 import { RerouteLayer } from "@/components/RerouteLayer";
 import { RadarSweepLayer } from "@/components/RadarSweepLayer";
+import { OffscreenIndicator } from "@/components/OffscreenIndicator";
 import { useFlights } from "@/hooks/use-flights";
 import { useSigmets } from "@/hooks/use-sigmets";
 import { useAirports } from "@/hooks/use-airports";
@@ -149,6 +150,13 @@ function MobileGlobePage() {
           />
         )}
       </CesiumGlobe>
+
+      <OffscreenIndicator
+        viewer={viewer}
+        flights={allFlights}
+        risks={risks}
+        selectedId={selectedId}
+      />
 
       <MobileControlBar
         autoRotate={autoRotate}
