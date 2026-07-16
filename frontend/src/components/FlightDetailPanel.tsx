@@ -1,12 +1,14 @@
 import { useState } from "react";
-import { X, Crosshair, Navigation, Gauge, Mountain, Globe2, Plane, Radio, MapPin } from "lucide-react";
-import type { FlightVector, FlightRoute, RiskAssessment } from "@/types/domain";
+import { X, Crosshair, Navigation, Gauge, Mountain, Globe2, Plane, Radio, MapPin, Route } from "lucide-react";
+import type { FlightVector, FlightRoute, RiskAssessment, HazardPolygon } from "@/types/domain";
 import { useFlightRegion } from "@/hooks/use-flight-region";
+import { computeRerouteOptions } from "@/lib/reroute-utils";
 
 interface FlightDetailPanelProps {
   flight: FlightVector | null;
   route?: FlightRoute | null;
   risk?: RiskAssessment;
+  sigmets?: HazardPolygon[];
   onClose?: () => void;
   onFollow?: () => void;
   followMode?: boolean;
@@ -16,6 +18,7 @@ export function FlightDetailPanel({
   flight,
   route,
   risk,
+  sigmets = [],
   onClose,
   onFollow,
   followMode,
@@ -183,6 +186,15 @@ export function FlightDetailPanel({
               </div>
             </div>
           )}
+
+          {isHigh && flight && (
+            <RerouteOptions
+              flight={flight}
+              route={route ?? null}
+              sigmets={sigmets}
+              risk={risk ?? null}
+            />
+          )}
         </div>
       )}
     </div>
@@ -219,6 +231,51 @@ function StatRow({
       <span className={`font-mono text-[10px] font-medium ${colorClass}`}>
         {value}
       </span>
+    </div>
+  );
+}
+
+function RerouteOptions({
+  flight,
+  route,
+  sigmets,
+  risk,
+}: {
+  flight: FlightVector;
+  route: FlightRoute | null;
+  sigmets: HazardPolygon[];
+  risk: RiskAssessment | null;
+}) {
+  if (!risk || risk.risk !== "HIGH" || !risk.sigmet_id) return null;
+  const options = computeRerouteOptions(flight, route, sigmets, risk.sigmet_id);
+  if (options.length === 0) return null;
+
+  return (
+    <div className="border-t border-hud-grid/15 px-3 py-2">
+      <div className="mb-1.5 flex items-center gap-1.5">
+        <Route className="size-2.5 text-hud-grid" />
+        <span className="font-mono text-[8px] font-bold tracking-[0.16em] text-hud-grid">
+          REROUTE ADVISOR
+        </span>
+      </div>
+      <div className="flex flex-col gap-1">
+        {options.map((opt) => (
+          <div
+            key={opt.id}
+            className="flex items-center justify-between border border-hud-grid/15 bg-hud-grid/5 px-2 py-1"
+          >
+            <span className="font-mono text-[9px] tracking-wider text-hud-grid">
+              {opt.side} {opt.offset_nm}NM
+            </span>
+            <span className="font-mono text-[9px] text-hud-ink">
+              +{Math.round(opt.extra_km)}km
+            </span>
+            <span className="font-mono text-[9px] text-hud-warn">
+              +{Math.ceil(opt.extra_min)}min
+            </span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

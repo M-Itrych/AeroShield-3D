@@ -7,6 +7,7 @@ import { HazardLayer } from "@/components/HazardLayer";
 import { FlightTrailLayer } from "@/components/FlightTrailLayer";
 import { RouteLineLayer } from "@/components/RouteLineLayer";
 import { FlightPredictLayer } from "@/components/FlightPredictLayer";
+import { RerouteLayer } from "@/components/RerouteLayer";
 import { AirportsLayer } from "@/components/AirportsLayer";
 import { FlightDetailPanel } from "@/components/FlightDetailPanel";
 import { GlobeControlBar, type LayerVisibility } from "@/components/GlobeControlBar";
@@ -175,6 +176,14 @@ function GlobePage() {
             route={routeQuery.data ?? null}
           />
         )}
+        {layers.routes && selectedFlight && selectedRisk?.risk === "HIGH" && (
+          <RerouteLayer
+            flight={selectedFlight}
+            route={routeQuery.data ?? null}
+            sigmets={sigmets}
+            risk={selectedRisk ?? null}
+          />
+        )}
       </CesiumGlobe>
 
       <HudBar
@@ -214,6 +223,7 @@ function GlobePage() {
         flight={selectedFlight}
         route={routeQuery.data ?? null}
         risk={selectedRisk ?? undefined}
+        sigmets={sigmets}
         onClose={handleDeselect}
         onFollow={() => setFollowMode((v) => !v)}
         followMode={followMode}
