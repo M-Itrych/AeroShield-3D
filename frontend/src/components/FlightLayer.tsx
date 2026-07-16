@@ -11,7 +11,7 @@ import {
   Math as CesiumMath,
   type Viewer as CesiumViewer,
 } from "cesium";
-import { useMemo } from "react";
+import { memo, useMemo } from "react";
 import type { FlightVector, RiskAssessment } from "@/types/domain";
 import type { BboxParams } from "@/hooks/use-viewport-bbox";
 import {
@@ -78,7 +78,7 @@ function inBbox(f: FlightVector, b: BboxParams): boolean {
   );
 }
 
-export function FlightLayer({
+export const FlightLayer = memo(function FlightLayer({
   flights,
   risks,
   viewportBbox,
@@ -187,4 +187,4 @@ export function FlightLayer({
       })}
     </>
   );
-}
+});

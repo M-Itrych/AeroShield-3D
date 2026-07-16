@@ -6,6 +6,7 @@ import {
   ArcType,
   DistanceDisplayCondition,
 } from "cesium";
+import { useMemo } from "react";
 import type { FlightVector, FlightRoute } from "@/types/domain";
 
 interface FlightPredictLayerProps {
@@ -158,59 +159,64 @@ export function FlightPredictLayer({
   route,
   minutes = 15,
 }: FlightPredictLayerProps) {
-  if (!flight || flight.heading == null || flight.velocity == null) return null;
+  const entities = useMemo(() => {
+    if (!flight || flight.heading == null || flight.velocity == null) return [];
 
-  const altM = flight.baro_altitude ?? 10000;
-  const icao24 = flight.icao24;
-  const entities: React.ReactNode[] = [];
+    const altM = flight.baro_altitude ?? 10000;
+    const icao24 = flight.icao24;
+    const out: React.ReactNode[] = [];
 
-  const projected = projectFlight(
-    flight.longitude,
-    flight.latitude,
-    altM,
-    flight.heading,
-    flight.velocity,
-    minutes * 60,
-  );
-
-  entities.push(...buildColoredSegments(projected.points, "predict-arc", icao24, 2));
-
-  const arr = route?.arrival_airport;
-  if (arr) {
-    const toAirportPath = buildPathToAirport(
-      projected.lon,
-      projected.lat,
-      projected.alt,
-      arr.longitude,
-      arr.latitude,
-      80,
-    );
-
-    entities.push(
-      ...buildColoredSegments(toAirportPath, "predict-path", icao24, 1.5),
-    );
-  }
-
-  const dep = route?.departure_airport;
-  if (dep) {
-    const traveledPoints = buildPathToAirport(
+    const projected = projectFlight(
       flight.longitude,
       flight.latitude,
       altM,
-      dep.longitude,
-      dep.latitude,
-      32,
-    ).reverse();
+      flight.heading,
+      flight.velocity,
+      minutes * 60,
+    );
 
-    for (let i = 0; i < traveledPoints.length; i++) {
-      const t = i / Math.max(1, traveledPoints.length - 1);
-      traveledPoints[i].altM = altM * Math.min(1, t * 1.5);
+    out.push(...buildColoredSegments(projected.points, "predict-arc", icao24, 2));
+
+    const arr = route?.arrival_airport;
+    if (arr) {
+      const toAirportPath = buildPathToAirport(
+        projected.lon,
+        projected.lat,
+        projected.alt,
+        arr.longitude,
+        arr.latitude,
+        24,
+      );
+
+      out.push(
+        ...buildColoredSegments(toAirportPath, "predict-path", icao24, 1.5),
+      );
     }
 
-    entities.push(
-      ...buildColoredSegments(traveledPoints, "predict-traveled", icao24, 1.2),
-    );
-  }
+    const dep = route?.departure_airport;
+    if (dep) {
+      const traveledPoints = buildPathToAirport(
+        flight.longitude,
+        flight.latitude,
+        altM,
+        dep.longitude,
+        dep.latitude,
+        12,
+      ).reverse();
 
+      for (let i = 0; i < traveledPoints.length; i++) {
+        const t = i / Math.max(1, traveledPoints.length - 1);
+        traveledPoints[i].altM = altM * Math.min(1, t * 1.5);
+      }
+
+      out.push(
+        ...buildColoredSegments(traveledPoints, "predict-traveled", icao24, 1.2),
+      );
+    }
+
+    return out;
+  }, [flight, route, minutes]);
+
+  if (entities.length === 0) return null;
   return <>{entities}</>;
 }

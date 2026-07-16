@@ -8,7 +8,7 @@ import {
   ArcType,
   ConstantProperty,
 } from "cesium";
-import { useMemo } from "react";
+import { memo, useMemo } from "react";
 import type { HazardPolygon, FlightVector } from "@/types/domain";
 
 interface HazardLayerProps {
@@ -37,7 +37,10 @@ function altBandIntersectsFlight(
   return flightAltFt >= min && flightAltFt <= max;
 }
 
-export function HazardLayer({ sigmets, selectedFlight }: HazardLayerProps) {
+export const HazardLayer = memo(function HazardLayer({
+  sigmets,
+  selectedFlight,
+}: HazardLayerProps) {
   const flightAltFt = selectedFlight?.baro_altitude
     ? selectedFlight.baro_altitude * 3.28084
     : null;
@@ -88,5 +91,5 @@ export function HazardLayer({ sigmets, selectedFlight }: HazardLayerProps) {
   );
 
   return <>{entities}</>;
-}
+});
 

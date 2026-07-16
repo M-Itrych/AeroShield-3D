@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import type { RiskAssessment } from "@/types/domain";
 
@@ -6,6 +6,7 @@ const RISK_QUERY_KEY = ["risk-flights"] as const;
 const SSE_URL = "/api/sse/risk-stream";
 const INITIAL_RETRY_MS = 3_000;
 const MAX_RETRY_MS = 30_000;
+const FLUSH_INTERVAL_MS = 2_000;
 
 export type RiskConnectionState = "connecting" | "open" | "reconnecting" | "error";
 
@@ -28,15 +29,28 @@ export function useRiskStream(options: RiskStreamOptions = {}): RiskStreamResult
   const [lastUpdated, setLastUpdated] = useState<number | null>(null);
 
   const risksRef = useRef<Map<string, RiskAssessment>>(new Map());
+  const dirtyRef = useRef(false);
   const retryDelayRef = useRef<number>(INITIAL_RETRY_MS);
   const retryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const flushTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const eventSourceRef = useRef<EventSource | null>(null);
   const closedRef = useRef(false);
+
+  const flush = useCallback(() => {
+    if (!dirtyRef.current) return;
+    dirtyRef.current = false;
+    const next = Array.from(risksRef.current.values());
+    setRisks(next);
+    setLastUpdated(Date.now());
+    queryClient.setQueryData<RiskAssessment[]>(RISK_QUERY_KEY, next);
+  }, [queryClient]);
 
   useEffect(() => {
     if (!enabled) return;
 
     closedRef.current = false;
+
+    flushTimerRef.current = setInterval(flush, FLUSH_INTERVAL_MS);
 
     const connect = () => {
       if (closedRef.current) return;
@@ -62,10 +76,7 @@ export function useRiskStream(options: RiskStreamOptions = {}): RiskStreamResult
           ) as RiskAssessment;
           if (!data.flight) return;
           risksRef.current.set(data.flight, data);
-          const next = Array.from(risksRef.current.values());
-          setRisks(next);
-          setLastUpdated(Date.now());
-          queryClient.setQueryData<RiskAssessment[]>(RISK_QUERY_KEY, next);
+          dirtyRef.current = true;
         } catch {
           // ignore malformed payloads
         }
@@ -89,11 +100,13 @@ export function useRiskStream(options: RiskStreamOptions = {}): RiskStreamResult
 
     return () => {
       closedRef.current = true;
+      if (flushTimerRef.current) clearInterval(flushTimerRef.current);
       if (retryTimerRef.current) clearTimeout(retryTimerRef.current);
+      flush();
       eventSourceRef.current?.close();
       eventSourceRef.current = null;
     };
-  }, [enabled, queryClient]);
+  }, [enabled, queryClient, flush]);
 
   return { risks, connectionState, lastUpdated };
 }
