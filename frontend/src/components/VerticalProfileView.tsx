@@ -145,14 +145,14 @@ export function VerticalProfileView({
   const gridLines = [0, 10000, 20000, 30000, 40000];
 
   return (
-    <div className="absolute bottom-12 left-1/2 z-30 w-[min(95vw,900px)] -translate-x-1/2 border border-hud-grid/20 bg-hud-charcoal/95 backdrop-blur-md sm:bottom-16">
+    <div className="absolute bottom-20 left-1/2 z-30 w-[min(95vw,900px)] -translate-x-1/2 border border-hud-border bg-hud-charcoal/95 backdrop-blur-md sm:bottom-24">
       <button
         onClick={() => setExpanded((v) => !v)}
-        className="flex w-full items-center justify-between border-b border-hud-grid/15 px-3 py-1.5"
+        className="flex w-full items-center justify-between border-b border-hud-border px-3 py-1.5"
       >
         <div className="flex items-center gap-1.5">
           <Mountain className="size-3 text-hud-grid" />
-          <span className="font-mono text-[9px] font-bold tracking-[0.16em] text-hud-grid">
+          <span className="font-mono text-[11px] font-bold tracking-[0.16em] text-hud-grid">
             VERTICAL PROFILE
           </span>
         </div>
@@ -268,7 +268,7 @@ export function VerticalProfileView({
             />
           </svg>
 
-          <div className="flex items-center justify-between px-1 pt-1 font-mono text-[8px] text-hud-dim">
+          <div className="flex items-center justify-between px-1 pt-1 font-mono text-[10px] text-hud-dim">
             <span>0 km</span>
             <span className="text-hud-grid">
               CUR: FL{Math.round(data.currentAltFt / 100)}

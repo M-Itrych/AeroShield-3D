@@ -10,7 +10,6 @@ import { RouteLineLayer } from "@/components/RouteLineLayer";
 import { FlightPredictLayer } from "@/components/FlightPredictLayer";
 import { RerouteLayer } from "@/components/RerouteLayer";
 import { RadarSweepLayer } from "@/components/RadarSweepLayer";
-import { OffscreenIndicator } from "@/components/OffscreenIndicator";
 import { BootSequence } from "@/components/BootSequence";
 import { useFlights } from "@/hooks/use-flights";
 import { useSigmets } from "@/hooks/use-sigmets";
@@ -173,13 +172,6 @@ function MobileGlobePage() {
         )}
       </CesiumGlobe>
 
-      <OffscreenIndicator
-        viewer={viewer}
-        flights={allFlights}
-        risks={risks}
-        selectedId={selectedId}
-      />
-
       <MobileControlBar
         autoRotate={autoRotate}
         onToggleAutoRotate={() => setAutoRotate((v) => !v)}
@@ -264,14 +256,14 @@ function MobileHudBar({
         : "bg-hud-dim";
 
   return (
-    <header className="absolute left-0 right-0 top-0 z-40 flex h-8 items-center justify-between border-b border-hud-grid/20 bg-hud-space/95 px-2 backdrop-blur-md">
+    <header className="absolute left-0 right-0 top-0 z-40 flex h-8 items-center justify-between border-b border-hud-border bg-hud-space/95 px-2 backdrop-blur-md">
       <div className="flex items-center gap-1">
         <span className={`size-1.5 rounded-full ${dotColor} ${connectionState !== "open" ? "animate-status-blink" : ""}`} />
-        <span className="font-mono text-[10px] font-bold tracking-[0.14em] text-hud-grid">
+        <span className="font-mono text-[12px] font-bold tracking-[0.14em] text-hud-grid">
           AEROSHIELD
         </span>
       </div>
-      <div className="flex items-center gap-2 font-mono text-[9px] tabular-nums">
+      <div className="flex items-center gap-2 font-mono text-[11px] tabular-nums">
         <span className="text-hud-grid">{String(flightCount).padStart(3, "0")}</span>
         <span className="text-hud-dim">TRK</span>
         <span className="text-hud-warn">{String(sigmetCount).padStart(2, "0")}</span>
@@ -300,21 +292,21 @@ function MobileControlBar({
     <div className="absolute bottom-3 right-3 z-30 flex flex-col gap-1.5">
       <button
         onClick={onResetView}
-        className="flex size-10 items-center justify-center border border-hud-grid/25 bg-hud-charcoal/95 backdrop-blur-md active:bg-hud-grid/15"
+        className="flex size-10 items-center justify-center border border-hud-border bg-hud-charcoal/95 backdrop-blur-md active:bg-hud-grid/15"
         aria-label="Reset view"
       >
-        <span className="font-mono text-[9px] text-hud-grid">HOME</span>
+        <span className="font-mono text-[11px] text-hud-grid">HOME</span>
       </button>
       <button
         onClick={onToggleAutoRotate}
         className={`flex size-10 items-center justify-center border backdrop-blur-md ${
           autoRotate
             ? "border-hud-grid bg-hud-grid/15"
-            : "border-hud-grid/25 bg-hud-charcoal/95"
+            : "border-hud-border bg-hud-charcoal/95"
         }`}
         aria-label="Toggle rotate"
       >
-        <span className={`font-mono text-[9px] ${autoRotate ? "text-hud-grid" : "text-hud-dim"}`}>ROT</span>
+        <span className={`font-mono text-[11px] ${autoRotate ? "text-hud-grid" : "text-hud-dim"}`}>ROT</span>
       </button>
     </div>
   );
@@ -357,14 +349,14 @@ function MobileSheet({
 
   return (
     <div
-      className={`absolute bottom-0 left-0 right-0 z-30 flex flex-col border-t border-hud-grid/25 bg-hud-charcoal/98 backdrop-blur-md ${SHEET_HEIGHTS[height]}`}
+      className={`absolute bottom-0 left-0 right-0 z-30 flex flex-col border-t border-hud-border bg-hud-charcoal/98 backdrop-blur-md ${SHEET_HEIGHTS[height]}`}
     >
       <button
         onClick={cycleHeight}
-        className="flex shrink-0 items-center justify-center gap-2 border-b border-hud-grid/15 py-1.5"
+        className="flex shrink-0 items-center justify-center gap-2 border-b border-hud-border py-1.5"
         aria-label="Toggle sheet height"
       >
-        <span className="h-1 w-8 rounded-full bg-hud-grid/30" />
+        <span className="h-1 w-8 rounded-full bg-hud-dim/40" />
         {height === "collapsed" ? (
           <ChevronUp className="size-3.5 text-hud-dim" />
         ) : (
@@ -372,12 +364,12 @@ function MobileSheet({
         )}
       </button>
 
-      <div className="flex shrink-0 border-b border-hud-grid/15">
+      <div className="flex shrink-0 border-b border-hud-border">
         {tabs.map(({ id, label, Icon, badge }) => (
           <button
             key={id}
             onClick={() => onTabChange(id)}
-            className={`relative flex flex-1 items-center justify-center gap-1 py-2 font-mono text-[9px] tracking-wider transition-colors ${
+            className={`relative flex flex-1 items-center justify-center gap-1 py-2 font-mono text-[11px] tracking-wider transition-colors ${
               tab === id
                 ? id === "hazards"
                   ? "text-hud-warn"
@@ -388,7 +380,7 @@ function MobileSheet({
             <Icon className="size-3.5" />
             {label}
             {badge ? (
-              <span className="absolute right-3 top-1 border border-hud-warn/50 px-1 font-mono text-[7px] text-hud-warn">
+              <span className="absolute right-3 top-1 border border-hud-warn/50 px-1 font-mono text-[9px] text-hud-warn">
                 {badge}
               </span>
             ) : null}
@@ -426,7 +418,7 @@ function MobileTracksList({
 
   if (isLoading) {
     return (
-      <div className="flex h-full items-center justify-center font-mono text-[10px] text-hud-dim">
+      <div className="flex h-full items-center justify-center font-mono text-[12px] text-hud-dim">
         LOADING TRACKS...
       </div>
     );
@@ -434,7 +426,7 @@ function MobileTracksList({
 
   if (flights.length === 0) {
     return (
-      <div className="flex h-full items-center justify-center font-mono text-[10px] text-hud-dim">
+      <div className="flex h-full items-center justify-center font-mono text-[12px] text-hud-dim">
         NO TRACK DATA
       </div>
     );
@@ -452,31 +444,31 @@ function MobileTracksList({
           <button
             key={f.icao24}
             onClick={() => onSelect(f.icao24)}
-            className={`flex w-full items-center justify-between border-b border-hud-grid/10 px-3 py-2.5 text-left active:bg-hud-grid/10 ${
+            className={`flex w-full items-center justify-between border-b border-hud-border px-3 py-2.5 text-left active:bg-hud-grid/10 ${
               isHigh ? "bg-hud-warn/10" : isSelected ? "bg-hud-grid/15" : ""
             }`}
           >
             <div className="min-w-0 flex-1">
               <div
-                className={`truncate font-mono text-[11px] font-medium ${
+                className={`truncate font-mono text-[13px] font-medium ${
                   isHigh ? "text-hud-warn" : "text-hud-ink"
                 }`}
               >
                 {f.callsign?.trim() || f.icao24}
               </div>
-              <div className="truncate font-mono text-[9px] text-hud-dim">
+              <div className="truncate font-mono text-[11px] text-hud-dim">
                 {f.origin_country}
                 {f.baro_altitude ? ` ${Math.round(f.baro_altitude * 3.28)}ft` : ""}
                 {tti != null && tti > 0 ? ` T${Math.ceil(tti)}M` : ""}
               </div>
             </div>
             <span
-              className={`shrink-0 border px-1.5 py-0.5 font-mono text-[8px] tracking-wider ${
+              className={`shrink-0 border px-1.5 py-0.5 font-mono text-[10px] tracking-wider ${
                 isHigh
                   ? "border-hud-warn text-hud-warn"
                   : isWarn
                     ? "border-hud-warn/50 text-hud-warn/80"
-                    : "border-hud-grid/30 text-hud-grid/80"
+                    : "border-hud-border text-hud-grid/80"
               }`}
             >
               {risk?.risk ?? "NONE"}
@@ -497,7 +489,7 @@ function MobileHazardsList({
 }) {
   if (sigmets.length === 0) {
     return (
-      <div className="flex h-full items-center justify-center font-mono text-[10px] text-hud-dim">
+      <div className="flex h-full items-center justify-center font-mono text-[12px] text-hud-dim">
         NO ACTIVE HAZARDS
       </div>
     );
@@ -508,17 +500,17 @@ function MobileHazardsList({
         <button
           key={sig.sigmet_id}
           onClick={() => onSelect(sig.sigmet_id)}
-          className="flex w-full flex-col gap-1 border-b border-hud-warn/10 px-3 py-2.5 text-left active:bg-hud-warn/10"
+          className="flex w-full flex-col gap-1 border-b border-hud-border px-3 py-2.5 text-left active:bg-hud-warn/10"
         >
           <div className="flex items-center justify-between">
-            <span className="border border-hud-warn/60 px-1.5 py-0.5 font-mono text-[8px] tracking-wider text-hud-warn">
+            <span className="border border-hud-warn/60 px-1.5 py-0.5 font-mono text-[10px] tracking-wider text-hud-warn">
               {sig.hazard_type}
             </span>
-            <span className="font-mono text-[8px] text-hud-dim">
+            <span className="font-mono text-[10px] text-hud-dim">
               {sig.sigmet_id}
             </span>
           </div>
-          <div className="font-mono text-[9px] text-hud-dim">
+          <div className="font-mono text-[11px] text-hud-dim">
             {sig.min_ft ? `FL${Math.round(sig.min_ft / 100)}` : "SFC"}
             {" - "}
             {sig.max_ft ? `FL${Math.round(sig.max_ft / 100)}` : "UNL"}
@@ -549,12 +541,12 @@ function MobileDetailView({
     return (
       <div className="flex h-full flex-col items-center justify-center gap-2 p-4">
         <Crosshair className="size-6 text-hud-dim" />
-        <span className="font-mono text-[10px] text-hud-dim">
+        <span className="font-mono text-[12px] text-hud-dim">
           SELECT A TRACK TO VIEW DETAILS
         </span>
         <button
           onClick={() => navigate({ to: "/" })}
-          className="mt-2 border border-hud-grid/25 px-3 py-1 font-mono text-[9px] text-hud-grid"
+          className="mt-2 border border-hud-border px-3 py-1 font-mono text-[11px] text-hud-grid"
         >
           DESKTOP VERSION
         </button>
@@ -571,7 +563,7 @@ function MobileDetailView({
 
   return (
     <div className="flex h-full flex-col overflow-y-auto overscroll-contain">
-      <div className="flex items-center justify-between border-b border-hud-grid/15 px-3 py-2">
+      <div className="flex items-center justify-between border-b border-hud-border px-3 py-2">
         <div className="flex items-center gap-1.5">
           <Crosshair className={`size-3.5 ${isWarn ? "text-hud-warn" : "text-hud-grid"}`} />
           <span className={`font-mono text-[12px] font-bold tracking-wider ${isWarn ? "text-hud-warn" : "text-hud-grid"}`}>
@@ -594,9 +586,9 @@ function MobileDetailView({
       />
 
       {route && (route.departure || route.arrival) && (
-        <div className="border-t border-hud-grid/15 px-3 py-2">
-          <div className="mb-1 font-mono text-[8px] tracking-[0.16em] text-hud-dim">ROUTE</div>
-          <div className="font-mono text-[11px] text-hud-ink">
+        <div className="border-t border-hud-border px-3 py-2">
+          <div className="mb-1 font-mono text-[10px] tracking-[0.16em] text-hud-dim">ROUTE</div>
+          <div className="font-mono text-[13px] text-hud-ink">
             <span className="text-hud-grid">
               {route.departure_airport?.iata ?? route.departure ?? "---"}
             </span>
@@ -608,28 +600,28 @@ function MobileDetailView({
         </div>
       )}
 
-      <div className="border-t border-hud-grid/15 px-3 py-2">
+      <div className="border-t border-hud-border px-3 py-2">
         <div className="flex items-center justify-between">
-          <span className="font-mono text-[8px] tracking-[0.16em] text-hud-dim">RISK</span>
+          <span className="font-mono text-[10px] tracking-[0.16em] text-hud-dim">RISK</span>
           <span
-            className={`border px-2 py-0.5 font-mono text-[10px] font-bold ${
+            className={`border px-2 py-0.5 font-mono text-[12px] font-bold ${
               riskLevel === "HIGH"
                 ? "border-hud-warn text-hud-warn"
                 : riskLevel === "MEDIUM"
                   ? "border-hud-warn/50 text-hud-warn/80"
-                  : "border-hud-grid/30 text-hud-grid/80"
+                  : "border-hud-border text-hud-grid/80"
             }`}
           >
             {riskLevel}
           </span>
         </div>
         {tti != null && tti > 0 && (
-          <div className="mt-1 font-mono text-[10px] text-hud-warn animate-status-blink">
+          <div className="mt-1 font-mono text-[12px] text-hud-warn animate-status-blink">
             TIME TO IMPACT: {Math.ceil(tti)} MIN
           </div>
         )}
         {risk?.sigmet_id && (
-          <div className="mt-1 font-mono text-[9px] text-hud-warn/80">
+          <div className="mt-1 font-mono text-[11px] text-hud-warn/80">
             SIGMET: {risk.sigmet_id}
           </div>
         )}
@@ -646,7 +638,7 @@ function MobileDetailView({
 
       <button
         onClick={() => navigate({ to: "/flight/$id", params: { id: flight.icao24 } })}
-        className="m-3 border border-hud-grid/25 py-2 font-mono text-[9px] text-hud-grid active:bg-hud-grid/10"
+        className="m-3 border border-hud-border py-2 font-mono text-[11px] text-hud-grid active:bg-hud-grid/10"
       >
         FULL DETAIL PAGE
       </button>
@@ -673,20 +665,20 @@ function MobileRerouteOptions({
   if (options.length === 0) return null;
 
   return (
-    <div className="border-t border-hud-grid/15 px-3 py-2">
-      <div className="mb-1.5 font-mono text-[8px] font-bold tracking-[0.16em] text-hud-grid">
+    <div className="border-t border-hud-border px-3 py-2">
+      <div className="mb-1.5 font-mono text-[10px] font-bold tracking-[0.16em] text-hud-grid">
         REROUTE ADVISOR
       </div>
       {options.map((opt: RerouteOption) => (
         <div
           key={opt.id}
-          className="mb-1 flex items-center justify-between border border-hud-grid/15 bg-hud-grid/5 px-2 py-1.5"
+          className="mb-1 flex items-center justify-between border border-hud-border bg-hud-grid/5 px-2 py-1.5"
         >
-          <span className="font-mono text-[10px] text-hud-grid">
+          <span className="font-mono text-[12px] text-hud-grid">
             {opt.side} {opt.offset_nm}NM
           </span>
-          <span className="font-mono text-[10px] text-hud-ink">+{Math.round(opt.extra_km)}km</span>
-          <span className="font-mono text-[10px] text-hud-warn">+{Math.ceil(opt.extra_min)}min</span>
+          <span className="font-mono text-[12px] text-hud-ink">+{Math.round(opt.extra_km)}km</span>
+          <span className="font-mono text-[12px] text-hud-warn">+{Math.ceil(opt.extra_min)}min</span>
         </div>
       ))}
     </div>
@@ -695,9 +687,9 @@ function MobileRerouteOptions({
 
 function DetailRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex items-center justify-between border-b border-hud-grid/8 px-3 py-1.5">
-      <span className="font-mono text-[8px] tracking-[0.14em] text-hud-dim">{label}</span>
-      <span className="font-mono text-[11px] font-medium text-hud-ink">{value}</span>
+    <div className="flex items-center justify-between border-b border-hud-border px-3 py-1.5">
+      <span className="font-mono text-[10px] tracking-[0.14em] text-hud-dim">{label}</span>
+      <span className="font-mono text-[13px] font-medium text-hud-ink">{value}</span>
     </div>
   );
 }

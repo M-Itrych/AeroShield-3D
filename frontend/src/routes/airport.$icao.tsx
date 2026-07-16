@@ -39,7 +39,7 @@ function AirportDetail() {
             <Badge variant="secondary">ACTIVE</Badge>
           </div>
           {airport && (
-            <span className="font-mono text-[11px] text-hud-dim">
+            <span className="font-mono text-[13px] text-hud-dim">
               {airport.iata ?? "--"} | {airport.country}
             </span>
           )}
@@ -63,7 +63,7 @@ function AirportDetail() {
           {airportQuery.isLoading && <Skeleton className="h-32 w-full" />}
 
           {!airportQuery.isLoading && !airport && (
-            <div className="border border-hud-grid/10 p-4 text-center font-mono text-[10px] tracking-wider text-hud-dim">
+            <div className="border border-hud-border p-4 text-center font-mono text-[12px] tracking-wider text-hud-dim">
               STATION NOT IN DATABASE
             </div>
           )}
@@ -85,7 +85,7 @@ function MetarCard({
   if (loading) return <Skeleton className="h-40 w-full" />;
   if (!metar) {
     return (
-      <div className="border border-hud-grid/10 p-4 text-center font-mono text-[10px] tracking-wider text-hud-dim">
+      <div className="border border-hud-border p-4 text-center font-mono text-[12px] tracking-wider text-hud-dim">
         NO METAR DATA
       </div>
     );
@@ -94,14 +94,14 @@ function MetarCard({
   const cat = metar.flight_category ?? "UNKNOWN";
 
   return (
-    <div className="flex flex-col gap-2 border border-hud-grid/15 bg-hud-charcoal/40 p-4">
+    <div className="flex flex-col gap-2 border border-hud-border bg-hud-charcoal/40 p-4">
       <div className="flex items-center justify-between">
-        <span className="font-mono text-[10px] font-bold tracking-[0.18em] text-hud-grid">
+        <span className="font-mono text-[12px] font-bold tracking-[0.18em] text-hud-grid">
           METAR
         </span>
         <span
-          className={`border px-2 py-0.5 font-mono text-[9px] font-bold tracking-wider ${
-            CAT_VARIANT[cat] ?? "border-hud-grid/15 text-hud-dim"
+          className={`border px-2 py-0.5 font-mono text-[11px] font-bold tracking-wider ${
+            CAT_VARIANT[cat] ?? "border-hud-border text-hud-dim"
           }`}
         >
           {cat}
@@ -109,12 +109,12 @@ function MetarCard({
       </div>
 
       {metar.raw_ob && (
-        <code className="block break-all font-mono text-[11px] text-hud-ink/80">
+        <code className="block break-all font-mono text-[13px] text-hud-ink/80">
           {metar.raw_ob}
         </code>
       )}
 
-      <div className="grid grid-cols-3 gap-2 font-mono text-[9px]">
+      <div className="grid grid-cols-3 gap-2 font-mono text-[11px]">
         <MetarStat
           label="TEMP"
           value={metar.temp_c != null ? `${metar.temp_c}C` : "--"}
@@ -151,7 +151,7 @@ function MetarCard({
 
 function MetarStat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex flex-col gap-0.5 border-l border-hud-grid/10 pl-1.5">
+    <div className="flex flex-col gap-0.5 border-l border-hud-border pl-1.5">
       <span className="tracking-[0.14em] text-hud-dim">{label}</span>
       <span className="text-hud-ink">{value}</span>
     </div>
@@ -160,8 +160,8 @@ function MetarStat({ label, value }: { label: string; value: string }) {
 
 function InfoRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex flex-col gap-1 border-l border-hud-grid/15 pl-3">
-      <span className="font-mono text-[9px] tracking-[0.16em] text-hud-dim">
+    <div className="flex flex-col gap-1 border-l border-hud-border pl-3">
+      <span className="font-mono text-[11px] tracking-[0.16em] text-hud-dim">
         {label}
       </span>
       <span className="font-mono text-sm text-hud-ink">{value}</span>
