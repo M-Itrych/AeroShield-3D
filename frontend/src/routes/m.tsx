@@ -41,9 +41,15 @@ function MobileGlobePage() {
   const [sheetHeight, setSheetHeight] = useState<SheetHeight>("half");
   const [autoRotate, setAutoRotate] = useState(false);
   const [bootElapsed, setBootElapsed] = useState(false);
+  const [bootForceTimeout, setBootForceTimeout] = useState(false);
 
   useEffect(() => {
     const t = setTimeout(() => setBootElapsed(true), 2200);
+    return () => clearTimeout(t);
+  }, []);
+
+  useEffect(() => {
+    const t = setTimeout(() => setBootForceTimeout(true), 15000);
     return () => clearTimeout(t);
   }, []);
 
@@ -57,6 +63,9 @@ function MobileGlobePage() {
   const airports = airportsQuery.data ?? [];
 
   const allFlights = useMemo(() => flightsQuery.data?.flights ?? [], [flightsQuery.data]);
+
+  const flightsLoaded = !flightsQuery.isLoading && allFlights.length > 0;
+  const bootReady = (bootElapsed && !!viewer && flightsLoaded) || bootForceTimeout;
 
   const selectedFlight: FlightVector | null = useMemo(() => {
     if (!selectedId) return null;
@@ -120,7 +129,7 @@ function MobileGlobePage() {
   return (
     <>
       <BootSequence
-        ready={bootElapsed && (!!viewer || !flightsQuery.isLoading)}
+        ready={bootReady}
         flightCount={allFlights.length}
         sigmetCount={sigmets.length}
         airportCount={airports.length}

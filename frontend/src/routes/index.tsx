@@ -54,6 +54,7 @@ function GlobePage() {
   const [sceneMode, setSceneMode] = useState<"3D" | "2D">("3D");
   const [autoRotate, setAutoRotate] = useState(false);
   const [bootElapsed, setBootElapsed] = useState(false);
+  const [bootForceTimeout, setBootForceTimeout] = useState(false);
 
   const searchInputRef = useRef<HTMLInputElement>(null);
 
@@ -159,7 +160,13 @@ function GlobePage() {
     return () => clearTimeout(t);
   }, []);
 
-  const bootReady = bootElapsed && (!!viewer || !flightsQuery.isLoading);
+  useEffect(() => {
+    const t = setTimeout(() => setBootForceTimeout(true), 15000);
+    return () => clearTimeout(t);
+  }, []);
+
+  const flightsLoaded = !flightsQuery.isLoading && (flightsQuery.data?.flights?.length ?? 0) > 0;
+  const bootReady = (bootElapsed && !!viewer && flightsLoaded) || bootForceTimeout;
 
   return (
     <>
