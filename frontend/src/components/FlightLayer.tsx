@@ -147,7 +147,6 @@ export function FlightLayer({
               image: icon,
               scale,
               rotation,
-              alignedAxis: Cartesian3.UNIT_Z,
               disableDepthTestDistance: Number.POSITIVE_INFINITY,
               heightReference: HeightReference.NONE,
               distanceDisplayCondition: new DistanceDisplayCondition(

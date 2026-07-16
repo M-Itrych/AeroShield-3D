@@ -168,7 +168,10 @@ function GlobePage() {
           <RouteLineLayer route={routeQuery.data ?? null} flight={selectedFlight} />
         )}
         {layers.routes && selectedFlight && (
-          <FlightPredictLayer flight={selectedFlight} />
+          <FlightPredictLayer
+            flight={selectedFlight}
+            route={routeQuery.data ?? null}
+          />
         )}
       </CesiumGlobe>
 
