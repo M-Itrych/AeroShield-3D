@@ -39,15 +39,15 @@ Legend:
 
 ## STAGE 2 — Frontend Foundation (Agent: `frontend-core`)
 
-- [ ] S2.1 Configure TanStack Router file-based routes: `/`, `/flight/$id`, `/airport/$icao`
-- [ ] S2.2 Configure TanStack Query client w/ 60s refetch for `['flights']`, `['sigmets']`
-- [ ] S2.3 shadcn/ui init — install: `button`, `card`, `badge`, `dialog`, `scrollarea`, `separator`, `tabs`, `tooltip`, `skeleton`
-- [ ] S2.4 Build `CesiumGlobe` component (resium `Viewer`, dark imagery provider, terrain disabled, no UI chrome, credit container hidden)
-- [ ] S2.5 Build `FlightLayer` rendering plane sprites w/ heading rotation (entity billboard)
-- [ ] S2.6 Build `HazardLayer` rendering `geojson` sigmet polygons as translucent red `Entity` w/ `extrudedHeight`
+- [x] S2.1 Configure TanStack Router file-based routes: `/`, `/flight/$id`, `/airport/$icao`
+- [x] S2.2 Configure TanStack Query client w/ 60s refetch for `['flights']`, `['sigmets']`
+- [x] S2.3 shadcn/ui init — install: `button`, `card`, `badge`, `dialog`, `scrollarea`, `separator`, `tabs`, `tooltip`, `skeleton`
+- [x] S2.4 Build `CesiumGlobe` component (resium `Viewer`, dark imagery provider, terrain disabled, no UI chrome, credit container hidden)
+- [x] S2.5 Build `FlightLayer` rendering plane sprites w/ heading rotation (entity billboard)
+- [x] S2.6 Build `HazardLayer` rendering `geojson` sigmet polygons as translucent red `Entity` w/ `extrudedHeight`
 - [ ] S2.7 Build `RiskSubscriber` hook consuming `/api/sse/risk-stream` via `EventSource`, hydrating into query cache
-- [ ] S2.8 Apply CRT scanline overlay + radar grid background to globe container only
-- [ ] S2.9 `pnpm run lint && pnpm run typecheck`
+- [x] S2.8 Apply CRT scanline overlay + radar grid background to globe container only
+- [x] S2.9 `pnpm run lint && pnpm run typecheck`
 
 ---
 

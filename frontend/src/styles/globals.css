@@ -4,33 +4,59 @@
 
 @layer base {
   :root {
-    --background: 15% 0.02 240;
-    --foreground: 95% 0.01 120;
-    --primary: 85% 0.18 160;
-    --destructive: 65% 0.22 25;
-    --border: 80% 0.12 190;
+    --background: 222 47% 3%;
+    --foreground: 160 30% 90%;
+    --card: 222 45% 5%;
+    --card-foreground: 160 30% 90%;
+    --popover: 222 45% 5%;
+    --popover-foreground: 160 30% 90%;
+    --primary: 159 100% 53%;
+    --primary-foreground: 222 47% 3%;
+    --secondary: 222 30% 12%;
+    --secondary-foreground: 160 30% 90%;
+    --muted: 222 30% 10%;
+    --muted-foreground: 160 15% 58%;
+    --accent: 190 80% 40%;
+    --accent-foreground: 160 30% 95%;
+    --destructive: 351 100% 60%;
+    --destructive-foreground: 160 30% 95%;
+    --border: 190 30% 16%;
+    --input: 190 30% 16%;
+    --ring: 159 100% 53%;
+    --radius: 0.5rem;
   }
+}
 
+@layer base {
+  * {
+    @apply border-border;
+  }
   html,
   body,
   #root {
     height: 100%;
-    background: oklch(var(--background));
-    color: oklch(var(--foreground));
+    margin: 0;
+  }
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
     font-family: ui-monospace, "JetBrains Mono", monospace;
+    overflow: hidden;
   }
 }
 
 @layer components {
   .cesium-container {
     position: relative;
+    height: 100%;
+    width: 100%;
   }
-
   .cesium-container::after {
     content: "";
     position: absolute;
     inset: 0;
     pointer-events: none;
+    z-index: 50;
     background-image: repeating-linear-gradient(
       0deg,
       rgba(18, 255, 170, 0.04) 0px,
@@ -40,4 +66,15 @@
     );
     mix-blend-mode: screen;
   }
+  .radar-grid-bg {
+    background-image:
+      linear-gradient(rgba(18, 255, 170, 0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(18, 255, 170, 0.05) 1px, transparent 1px);
+    background-size: 32px 32px;
+  }
+}
+
+.cesium-viewer-bottom,
+.cesium-widget-credits {
+  display: none !important;
 }
