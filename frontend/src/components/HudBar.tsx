@@ -1,13 +1,20 @@
 import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
+import type { RiskConnectionState } from "@/hooks/use-risk-stream";
 
 interface HudBarProps {
   flightCount: number;
   sigmetCount: number;
   highRiskCount?: number;
+  riskConnectionState?: RiskConnectionState;
 }
 
-export function HudBar({ flightCount, sigmetCount, highRiskCount }: HudBarProps) {
+export function HudBar({
+  flightCount,
+  sigmetCount,
+  highRiskCount,
+  riskConnectionState = "open",
+}: HudBarProps) {
   const [utc, setUtc] = useState("");
 
   useEffect(() => {
@@ -38,6 +45,7 @@ export function HudBar({ flightCount, sigmetCount, highRiskCount }: HudBarProps)
             TACTICAL TELEMETRY
           </span>
         </div>
+        <StreamStatus state={riskConnectionState} />
       </div>
 
       <div className="flex items-center gap-2 sm:gap-3">
@@ -82,6 +90,39 @@ function Stat({
         className={`font-mono text-[11px] font-bold tabular-nums sm:text-xs ${color}`}
       >
         {String(value).padStart(3, "0")}
+      </span>
+    </div>
+  );
+}
+
+function StreamStatus({ state }: { state: RiskConnectionState }) {
+  const label =
+    state === "open"
+      ? "LIVE"
+      : state === "connecting"
+        ? "SYNC"
+        : state === "reconnecting"
+          ? "RECON"
+          : "DOWN";
+  const colorClass =
+    state === "open"
+      ? "text-hud-grid"
+      : state === "error"
+        ? "text-hud-warn"
+        : "text-hud-dim";
+  const dotClass =
+    state === "open"
+      ? "bg-hud-grid"
+      : state === "error"
+        ? "bg-hud-warn animate-status-blink"
+        : "bg-hud-dim animate-status-blink";
+  return (
+    <div className="flex items-center gap-1">
+      <span className={`size-1.5 rounded-full ${dotClass}`} />
+      <span
+        className={`hidden font-mono text-[9px] tracking-[0.16em] ${colorClass} md:inline`}
+      >
+        {label}
       </span>
     </div>
   );

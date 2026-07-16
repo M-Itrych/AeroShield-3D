@@ -16,6 +16,7 @@ import { HazardPanel } from "@/components/HazardPanel";
 import { useFlights } from "@/hooks/use-flights";
 import { useSigmets } from "@/hooks/use-sigmets";
 import { useAirports } from "@/hooks/use-airports";
+import { useRiskStream } from "@/hooks/use-risk-stream";
 import { useViewportBbox } from "@/hooks/use-viewport-bbox";
 import { useFlightTrail } from "@/hooks/use-flight-trail";
 import { useFlightRoute } from "@/hooks/use-flight-route";
@@ -24,7 +25,7 @@ import { useGlobeClick } from "@/hooks/use-globe-click";
 import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
 import { useAutoRotate } from "@/hooks/use-auto-rotate";
 import { resetView, focusSigmet } from "@/lib/camera-utils";
-import type { RiskAssessment, FlightVector } from "@/types/domain";
+import type { FlightVector } from "@/types/domain";
 
 export const Route = createFileRoute("/")({
   component: GlobePage,
@@ -54,11 +55,10 @@ function GlobePage() {
   const flightsQuery = useFlights(riskFilter);
   const sigmetsQuery = useSigmets();
   const airportsQuery = useAirports();
+  const { risks, connectionState } = useRiskStream();
 
   const sigmets = sigmetsQuery.data?.sigmets ?? [];
   const airports = airportsQuery.data ?? [];
-
-  const risks: RiskAssessment[] = useMemo(() => [], []);
 
   const filteredFlights = useMemo(() => {
     const allFlights = flightsQuery.data?.flights ?? [];
@@ -179,6 +179,7 @@ function GlobePage() {
         flightCount={filteredFlights.length}
         sigmetCount={sigmets.length}
         highRiskCount={highRiskCount}
+        riskConnectionState={connectionState}
       />
 
       <FlightsPanel
