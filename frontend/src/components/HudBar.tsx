@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { CircleHelp } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { LegendDialog } from "@/components/LegendDialog";
-import { ThemeToggle } from "@/components/ThemeToggle";
 import type { RiskConnectionState } from "@/hooks/use-risk-stream";
 
 interface HudBarProps {
@@ -61,7 +60,6 @@ export function HudBar({
           <CircleHelp className="size-3" />
           <span className="hidden sm:inline">GUIDE</span>
         </button>
-        <ThemeToggle />
         <Stat label="TRACKS" value={flightCount} />
         <span className="h-3 w-px bg-hud-border" />
         <Stat label="HAZARDS" value={sigmetCount} color="text-hud-warn" />
