@@ -32,7 +32,7 @@ const HAZARD_OUTLINE_DIM = Color.fromCssColorString("#ff5f1f").withAlpha(0.2);
 const DEFAULT_MIN_FT = 0;
 const DEFAULT_MAX_FT = 60000;
 
-const HAZARD_NEAR_FAR = new DistanceDisplayCondition(0, 15_000_000);
+const HAZARD_NEAR_FAR = new DistanceDisplayCondition(0, 8_000_000);
 
 const PULSE_PERIOD_S = 1.6;
 const PULSE_EPOCH = JulianDate.now();
@@ -111,7 +111,7 @@ export const HazardLayer = memo(function HazardLayer({
           Cartesian3.fromDegreesArray(coords),
         );
 
-        const extrudedHeightProp = new ConstantProperty(maxM);
+        const shouldExtrude = selectedFlight != null;
 
         return (
           <Entity
@@ -123,8 +123,8 @@ export const HazardLayer = memo(function HazardLayer({
               material: new ColorMaterialProperty(fill),
               outline: true,
               outlineColor: outlineColor,
-              height: minM,
-              extrudedHeight: extrudedHeightProp,
+              height: shouldExtrude ? minM : 0,
+              extrudedHeight: shouldExtrude ? maxM : undefined,
               heightReference: HeightReference.NONE,
               fill: true,
               arcType: ArcType.GEODESIC,
@@ -133,7 +133,7 @@ export const HazardLayer = memo(function HazardLayer({
           />
         );
       }),
-    [sigmets, flightAltFt, viewportBbox],
+    [sigmets, flightAltFt, viewportBbox, selectedFlight],
   );
 
   return <>{entities}</>;
