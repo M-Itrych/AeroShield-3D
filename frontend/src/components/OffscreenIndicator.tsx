@@ -23,6 +23,8 @@ interface Indicator {
 
 const EDGE_PADDING = 60;
 const UPDATE_MS = 500;
+const MAX_INDICATORS = 6;
+const BEHIND_GLOBE_THRESHOLD = -1;
 
 export function OffscreenIndicator({
   viewer,
@@ -49,6 +51,7 @@ export function OffscreenIndicator({
     const cx = w / 2;
     const cy = h / 2;
 
+    const cameraPosition = viewer.camera.positionWC;
     const result: Indicator[] = [];
 
     for (const id of highRiskIds) {
@@ -56,6 +59,13 @@ export function OffscreenIndicator({
       if (!f) continue;
 
       const pos = Cartesian3.fromDegrees(f.longitude, f.latitude, f.baro_altitude ?? 10000);
+
+      const toPoint = Cartesian3.subtract(pos, cameraPosition, new Cartesian3());
+      const cameraDir = viewer.camera.directionWC;
+      const dot = Cartesian3.dot(toPoint, cameraDir);
+
+      if (dot < BEHIND_GLOBE_THRESHOLD) continue;
+
       const screen = SceneTransforms.worldToWindowCoordinates(viewer.scene, pos);
 
       if (!screen) continue;
@@ -63,11 +73,16 @@ export function OffscreenIndicator({
       const sx = screen.x;
       const sy = screen.y;
 
-      const onScreen = sx >= 0 && sx <= w && sy >= 0 && sy <= h;
+      if (!isFinite(sx) || !isFinite(sy)) continue;
+
+      const onScreen = sx >= -10 && sx <= w + 10 && sy >= -10 && sy <= h + 10;
       if (onScreen) continue;
 
       const dx = sx - cx;
       const dy = sy - cy;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < 1) continue;
+
       const angle = Math.atan2(dy, dx);
 
       const margin = EDGE_PADDING;
@@ -95,7 +110,13 @@ export function OffscreenIndicator({
       });
     }
 
-    setIndicators(result);
+    result.sort((a, b) => {
+      const da = Math.hypot(a.x - cx, a.y - cy);
+      const db = Math.hypot(b.x - cx, b.y - cy);
+      return da - db;
+    });
+
+    setIndicators(result.slice(0, MAX_INDICATORS));
   }, [viewer, flights, risks, selectedId]);
 
   useEffect(() => {
