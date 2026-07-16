@@ -1,31 +1,18 @@
-export const FLIGHT_ICON_LIME =
-  "data:image/svg+xml;base64," +
-  btoa(
-    `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-      <path d="M12 2 L20 22 L12 17 L4 22 Z" fill="#39ff14" fill-opacity="0.85" stroke="#08080a" stroke-width="1"/>
-    </svg>`,
-  );
+const LIME = "#39ff14";
+const ORANGE = "#ff5f1f";
 
-export const FLIGHT_ICON_ORANGE =
-  "data:image/svg+xml;base64," +
-  btoa(
-    `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-      <path d="M12 2 L20 22 L12 17 L4 22 Z" fill="#ff5f1f" fill-opacity="0.9" stroke="#08080a" stroke-width="1"/>
-    </svg>`,
+function svg(color: string, alpha: number): string {
+  return (
+    "data:image/svg+xml," +
+    encodeURIComponent(
+      `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12">` +
+        `<path d="M6 1 L10 11 L6 8 L2 11 Z" fill="${color}" fill-opacity="${alpha}"/>` +
+        `</svg>`,
+    )
   );
+}
 
-export const FLIGHT_ICON_LIME_DIM =
-  "data:image/svg+xml;base64," +
-  btoa(
-    `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-      <path d="M12 2 L20 22 L12 17 L4 22 Z" fill="#39ff14" fill-opacity="0.6" stroke="#08080a" stroke-width="1"/>
-    </svg>`,
-  );
-
-export const FLIGHT_ICON_ORANGE_DIM =
-  "data:image/svg+xml;base64," +
-  btoa(
-    `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-      <path d="M12 2 L20 22 L12 17 L4 22 Z" fill="#ff5f1f" fill-opacity="0.7" stroke="#08080a" stroke-width="1"/>
-    </svg>`,
-  );
+export const FLIGHT_ICON_LIME = svg(LIME, 0.9);
+export const FLIGHT_ICON_ORANGE = svg(ORANGE, 0.95);
+export const FLIGHT_ICON_LIME_DIM = svg(LIME, 0.5);
+export const FLIGHT_ICON_ORANGE_DIM = svg(ORANGE, 0.6);

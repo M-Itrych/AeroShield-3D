@@ -30,7 +30,7 @@ interface FlightLayerProps {
   selectedId?: string | null;
 }
 
-const MAX_FLIGHTS = 200;
+const MAX_FLIGHTS = 150;
 
 const LABEL_FILL = Color.fromCssColorString("#e8eef2").withAlpha(0.92);
 const LABEL_OUTLINE = Color.fromCssColorString("#08080a").withAlpha(0.9);
