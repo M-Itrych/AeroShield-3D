@@ -263,7 +263,7 @@ function MobileHudBar({
           AEROSHIELD
         </span>
       </div>
-      <div className="flex items-center gap-2 font-mono text-[11px] tabular-nums">
+      <div className="flex items-center gap-2 font-mono text-[14px] tabular-nums">
         <span className="text-hud-grid">{String(flightCount).padStart(3, "0")}</span>
         <span className="text-hud-dim">TRK</span>
         <span className="text-hud-warn">{String(sigmetCount).padStart(2, "0")}</span>
@@ -295,7 +295,7 @@ function MobileControlBar({
         className="flex size-10 items-center justify-center border border-hud-border bg-hud-charcoal/95 backdrop-blur-md active:bg-hud-grid/15"
         aria-label="Reset view"
       >
-        <span className="font-mono text-[11px] text-hud-grid">HOME</span>
+        <span className="font-mono text-[14px] text-hud-grid">HOME</span>
       </button>
       <button
         onClick={onToggleAutoRotate}
@@ -306,7 +306,7 @@ function MobileControlBar({
         }`}
         aria-label="Toggle rotate"
       >
-        <span className={`font-mono text-[11px] ${autoRotate ? "text-hud-grid" : "text-hud-dim"}`}>ROT</span>
+        <span className={`font-mono text-[14px] ${autoRotate ? "text-hud-grid" : "text-hud-dim"}`}>ROT</span>
       </button>
     </div>
   );
@@ -369,7 +369,7 @@ function MobileSheet({
           <button
             key={id}
             onClick={() => onTabChange(id)}
-            className={`relative flex flex-1 items-center justify-center gap-1 py-2 font-mono text-[11px] tracking-wider transition-colors ${
+            className={`relative flex flex-1 items-center justify-center gap-1 py-2 font-mono text-[14px] tracking-wider transition-colors ${
               tab === id
                 ? id === "hazards"
                   ? "text-hud-warn"
@@ -380,7 +380,7 @@ function MobileSheet({
             <Icon className="size-3.5" />
             {label}
             {badge ? (
-              <span className="absolute right-3 top-1 border border-hud-warn/50 px-1 font-mono text-[9px] text-hud-warn">
+              <span className="absolute right-3 top-1 border border-hud-warn/50 px-1 font-mono text-[12px] text-hud-warn">
                 {badge}
               </span>
             ) : null}
@@ -456,14 +456,14 @@ function MobileTracksList({
               >
                 {f.callsign?.trim() || f.icao24}
               </div>
-              <div className="truncate font-mono text-[11px] text-hud-dim">
+              <div className="truncate font-mono text-[14px] text-hud-dim">
                 {f.origin_country}
                 {f.baro_altitude ? ` ${Math.round(f.baro_altitude * 3.28)}ft` : ""}
                 {tti != null && tti > 0 ? ` T${Math.ceil(tti)}M` : ""}
               </div>
             </div>
             <span
-              className={`shrink-0 border px-1.5 py-0.5 font-mono text-[10px] tracking-wider ${
+              className={`shrink-0 border px-1.5 py-0.5 font-mono text-[13px] tracking-wider ${
                 isHigh
                   ? "border-hud-warn text-hud-warn"
                   : isWarn
@@ -503,14 +503,14 @@ function MobileHazardsList({
           className="flex w-full flex-col gap-1 border-b border-hud-border px-3 py-2.5 text-left active:bg-hud-warn/10"
         >
           <div className="flex items-center justify-between">
-            <span className="border border-hud-warn/60 px-1.5 py-0.5 font-mono text-[10px] tracking-wider text-hud-warn">
+            <span className="border border-hud-warn/60 px-1.5 py-0.5 font-mono text-[13px] tracking-wider text-hud-warn">
               {sig.hazard_type}
             </span>
-            <span className="font-mono text-[10px] text-hud-dim">
+            <span className="font-mono text-[13px] text-hud-dim">
               {sig.sigmet_id}
             </span>
           </div>
-          <div className="font-mono text-[11px] text-hud-dim">
+          <div className="font-mono text-[14px] text-hud-dim">
             {sig.min_ft ? `FL${Math.round(sig.min_ft / 100)}` : "SFC"}
             {" - "}
             {sig.max_ft ? `FL${Math.round(sig.max_ft / 100)}` : "UNL"}
@@ -546,7 +546,7 @@ function MobileDetailView({
         </span>
         <button
           onClick={() => navigate({ to: "/" })}
-          className="mt-2 border border-hud-border px-3 py-1 font-mono text-[11px] text-hud-grid"
+          className="mt-2 border border-hud-border px-3 py-1 font-mono text-[14px] text-hud-grid"
         >
           DESKTOP VERSION
         </button>
@@ -587,7 +587,7 @@ function MobileDetailView({
 
       {route && (route.departure || route.arrival) && (
         <div className="border-t border-hud-border px-3 py-2">
-          <div className="mb-1 font-mono text-[10px] tracking-[0.16em] text-hud-dim">ROUTE</div>
+          <div className="mb-1 font-mono text-[13px] tracking-[0.16em] text-hud-dim">ROUTE</div>
           <div className="font-mono text-[13px] text-hud-ink">
             <span className="text-hud-grid">
               {route.departure_airport?.iata ?? route.departure ?? "---"}
@@ -602,7 +602,7 @@ function MobileDetailView({
 
       <div className="border-t border-hud-border px-3 py-2">
         <div className="flex items-center justify-between">
-          <span className="font-mono text-[10px] tracking-[0.16em] text-hud-dim">RISK</span>
+          <span className="font-mono text-[13px] tracking-[0.16em] text-hud-dim">RISK</span>
           <span
             className={`border px-2 py-0.5 font-mono text-[12px] font-bold ${
               riskLevel === "HIGH"
@@ -621,7 +621,7 @@ function MobileDetailView({
           </div>
         )}
         {risk?.sigmet_id && (
-          <div className="mt-1 font-mono text-[11px] text-hud-warn/80">
+          <div className="mt-1 font-mono text-[14px] text-hud-warn/80">
             SIGMET: {risk.sigmet_id}
           </div>
         )}
@@ -638,7 +638,7 @@ function MobileDetailView({
 
       <button
         onClick={() => navigate({ to: "/flight/$id", params: { id: flight.icao24 } })}
-        className="m-3 border border-hud-border py-2 font-mono text-[11px] text-hud-grid active:bg-hud-grid/10"
+        className="m-3 border border-hud-border py-2 font-mono text-[14px] text-hud-grid active:bg-hud-grid/10"
       >
         FULL DETAIL PAGE
       </button>
@@ -666,7 +666,7 @@ function MobileRerouteOptions({
 
   return (
     <div className="border-t border-hud-border px-3 py-2">
-      <div className="mb-1.5 font-mono text-[10px] font-bold tracking-[0.16em] text-hud-grid">
+      <div className="mb-1.5 font-mono text-[13px] font-bold tracking-[0.16em] text-hud-grid">
         REROUTE ADVISOR
       </div>
       {options.map((opt: RerouteOption) => (
@@ -688,7 +688,7 @@ function MobileRerouteOptions({
 function DetailRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-center justify-between border-b border-hud-border px-3 py-1.5">
-      <span className="font-mono text-[10px] tracking-[0.14em] text-hud-dim">{label}</span>
+      <span className="font-mono text-[13px] tracking-[0.14em] text-hud-dim">{label}</span>
       <span className="font-mono text-[13px] font-medium text-hud-ink">{value}</span>
     </div>
   );

@@ -73,10 +73,10 @@ function TermGroup({ title, terms }: { title: string; terms: Term[] }) {
       <div className="flex flex-col gap-2">
         {terms.map((t) => (
           <div key={t.term} className="flex flex-col gap-0.5">
-            <div className="font-mono text-[11px] font-bold tracking-wider text-hud-ink">
+            <div className="font-mono text-[14px] font-bold tracking-wider text-hud-ink">
               {t.term}
             </div>
-            <p className="font-mono text-[11px] leading-relaxed text-hud-dim">
+            <p className="font-mono text-[14px] leading-relaxed text-hud-dim">
               {t.desc}
             </p>
           </div>
@@ -94,7 +94,7 @@ export function LegendDialog({ open, onOpenChange }: LegendDialogProps) {
           <DialogTitle className="font-mono text-[13px] font-bold tracking-[0.16em] text-hud-grid">
             FIELD GUIDE
           </DialogTitle>
-          <DialogDescription className="font-mono text-[11px] tracking-wider text-hud-dim">
+          <DialogDescription className="font-mono text-[14px] tracking-wider text-hud-dim">
             What the telemetry, hazards, and colors mean.
           </DialogDescription>
         </DialogHeader>

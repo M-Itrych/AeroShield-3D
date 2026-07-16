@@ -60,7 +60,7 @@ export function FlightDetailPanel({
         <div className="flex items-center gap-1">
           <button
             onClick={onFollow}
-            className={`border px-2 py-0.5 font-mono text-[11px] tracking-wider transition-colors ${
+            className={`border px-2 py-0.5 font-mono text-[14px] tracking-wider transition-colors ${
               followMode
                 ? "border-hud-grid bg-hud-grid/15 text-hud-grid"
                 : "border-hud-border text-hud-dim hover:border-hud-grid/50"
@@ -72,7 +72,7 @@ export function FlightDetailPanel({
             onClick={() => setExpanded((v) => !v)}
             className="text-hud-dim transition-colors hover:text-hud-grid"
           >
-            <span className="font-mono text-[11px]">{expanded ? "[-]" : "[+]"}</span>
+            <span className="font-mono text-[14px]">{expanded ? "[-]" : "[+]"}</span>
           </button>
           <button
             onClick={onClose}
@@ -151,7 +151,7 @@ export function FlightDetailPanel({
               accent="warn"
             />
           )}
-          <div className="border-b border-hud-border px-3 py-1.5 font-mono text-[10px] leading-relaxed text-hud-dim">
+          <div className="border-b border-hud-border px-3 py-1.5 font-mono text-[13px] leading-relaxed text-hud-dim">
             {riskLevel === "HIGH"
               ? "Inside a SIGMET area and altitude band now."
               : riskLevel === "MEDIUM"
@@ -161,7 +161,7 @@ export function FlightDetailPanel({
 
           {route && (route.departure || route.arrival) && (
             <div className="border-t border-hud-border px-3 py-2">
-              <div className="mb-1 font-mono text-[10px] tracking-[0.16em] text-hud-dim">
+              <div className="mb-1 font-mono text-[13px] tracking-[0.16em] text-hud-dim">
                 ROUTE
               </div>
               <div className="font-mono text-[12px] text-hud-ink">
@@ -174,12 +174,12 @@ export function FlightDetailPanel({
                 </span>
               </div>
               {route.departure_airport && (
-                <div className="mt-1 font-mono text-[11px] text-hud-dim">
+                <div className="mt-1 font-mono text-[14px] text-hud-dim">
                   DEP: {route.departure_airport.name}
                 </div>
               )}
               {route.arrival_airport && (
-                <div className="font-mono text-[11px] text-hud-dim">
+                <div className="font-mono text-[14px] text-hud-dim">
                   ARR: {route.arrival_airport.name}
                 </div>
               )}
@@ -188,7 +188,7 @@ export function FlightDetailPanel({
 
           {risk?.sigmet_id && (
             <div className="border-t border-hud-border px-3 py-2">
-              <div className="font-mono text-[11px] text-hud-warn">
+              <div className="font-mono text-[14px] text-hud-warn">
                 SIGMET: {risk.sigmet_id}
               </div>
             </div>
@@ -231,7 +231,7 @@ function StatRow({
     <div className="flex items-center justify-between border-b border-hud-border px-3 py-1.5">
       <div className="flex items-center gap-1.5">
         <Icon className="size-2.5 text-hud-dim" />
-        <span className="font-mono text-[10px] tracking-[0.14em] text-hud-dim">
+        <span className="font-mono text-[13px] tracking-[0.14em] text-hud-dim">
           {label}
         </span>
       </div>
@@ -261,7 +261,7 @@ function RerouteOptions({
     <div className="border-t border-hud-border px-3 py-2">
       <div className="mb-1.5 flex items-center gap-1.5">
         <Route className="size-2.5 text-hud-grid" />
-        <span className="font-mono text-[10px] font-bold tracking-[0.16em] text-hud-grid">
+        <span className="font-mono text-[13px] font-bold tracking-[0.16em] text-hud-grid">
           REROUTE ADVISOR
         </span>
       </div>
@@ -271,13 +271,13 @@ function RerouteOptions({
             key={opt.id}
             className="flex items-center justify-between border border-hud-border bg-hud-grid/5 px-2 py-1"
           >
-            <span className="font-mono text-[11px] tracking-wider text-hud-grid">
+            <span className="font-mono text-[14px] tracking-wider text-hud-grid">
               {opt.side} {opt.offset_nm}NM
             </span>
-            <span className="font-mono text-[11px] text-hud-ink">
+            <span className="font-mono text-[14px] text-hud-ink">
               +{Math.round(opt.extra_km)}km
             </span>
-            <span className="font-mono text-[11px] text-hud-warn">
+            <span className="font-mono text-[14px] text-hud-warn">
               +{Math.ceil(opt.extra_min)}min
             </span>
           </div>

@@ -45,7 +45,7 @@ export function HudBar({
           <span className="font-mono text-[13px] font-bold tracking-[0.16em] text-hud-grid sm:text-xs">
             AEROSHIELD
           </span>
-          <span className="ml-1 hidden font-mono text-[11px] tracking-[0.2em] text-hud-dim sm:inline">
+          <span className="ml-1 hidden font-mono text-[14px] tracking-[0.2em] text-hud-dim sm:inline">
             TACTICAL TELEMETRY
           </span>
         </div>
@@ -55,7 +55,7 @@ export function HudBar({
       <div className="flex items-center gap-2 sm:gap-3">
         <button
           onClick={() => setGuideOpen(true)}
-          className="flex items-center gap-1 border border-hud-border bg-hud-charcoal/60 px-2 py-1 font-mono text-[11px] tracking-wider text-hud-dim transition-colors hover:text-hud-grid active:scale-[0.96]"
+          className="flex items-center gap-1 border border-hud-border bg-hud-charcoal/60 px-2 py-1 font-mono text-[14px] tracking-wider text-hud-dim transition-colors hover:text-hud-grid active:scale-[0.96]"
           aria-label="Open field guide"
         >
           <CircleHelp className="size-3" />
@@ -68,7 +68,7 @@ export function HudBar({
         {highRiskCount !== undefined && highRiskCount > 0 && (
           <>
             <span className="h-3 w-px bg-hud-border" />
-            <Badge variant="destructive" className="font-mono text-[11px]">
+            <Badge variant="destructive" className="font-mono text-[14px]">
               {highRiskCount} CRIT
             </Badge>
           </>
@@ -77,7 +77,7 @@ export function HudBar({
         <span className="font-mono text-[12px] tabular-nums tracking-wider text-hud-ink sm:text-xs">
           {utc}
         </span>
-        <span className="ml-1 hidden font-mono text-[11px] tracking-[0.2em] text-hud-dim md:inline">
+        <span className="ml-1 hidden font-mono text-[14px] tracking-[0.2em] text-hud-dim md:inline">
           UTC
         </span>
       </div>
@@ -98,7 +98,7 @@ function Stat({
 }) {
   return (
     <div className="flex items-center gap-1.5">
-      <span className="font-mono text-[10px] tracking-[0.15em] text-hud-dim sm:text-[11px]">
+      <span className="font-mono text-[13px] tracking-[0.15em] text-hud-dim sm:text-[14px]">
         {label}
       </span>
       <span
@@ -135,7 +135,7 @@ function StreamStatus({ state }: { state: RiskConnectionState }) {
     <div className="flex items-center gap-1">
       <span className={`size-1.5 rounded-full ${dotClass}`} />
       <span
-        className={`hidden font-mono text-[11px] tracking-[0.16em] ${colorClass} md:inline`}
+        className={`hidden font-mono text-[14px] tracking-[0.16em] ${colorClass} md:inline`}
       >
         {label}
       </span>

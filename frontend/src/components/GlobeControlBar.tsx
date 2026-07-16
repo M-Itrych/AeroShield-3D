@@ -27,7 +27,7 @@ const LAYER_BUTTONS = [
 ];
 
 const BTN_BASE =
-  "flex items-center gap-1 border px-2 py-1 font-mono text-[10px] tracking-wider transition-colors active:scale-[0.96]";
+  "flex items-center gap-1 border px-2 py-1 font-mono text-[13px] tracking-wider transition-colors active:scale-[0.96]";
 
 export function GlobeControlBar({
   layers,
@@ -40,7 +40,7 @@ export function GlobeControlBar({
 }: GlobeControlBarProps) {
   return (
     <div className="absolute bottom-2 left-1/2 z-30 flex -translate-x-1/2 items-stretch gap-1.5 border border-hud-border bg-hud-charcoal/95 p-1.5 backdrop-blur-md sm:bottom-2">
-      <span className="flex items-center px-1 font-mono text-[10px] tracking-[0.16em] text-hud-dim">
+      <span className="flex items-center px-1 font-mono text-[13px] tracking-[0.16em] text-hud-dim">
         LAYERS
       </span>
 
@@ -66,7 +66,7 @@ export function GlobeControlBar({
         );
       })}
 
-      <span className="flex items-center px-1 font-mono text-[10px] tracking-[0.16em] text-hud-dim">
+      <span className="flex items-center px-1 font-mono text-[13px] tracking-[0.16em] text-hud-dim">
         VIEW
       </span>
 
