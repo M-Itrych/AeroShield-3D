@@ -3,6 +3,7 @@ use serde::Deserialize;
 use std::time::Duration;
 
 #[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
 struct SigmetResponse {
     #[allow(dead_code)]
     icao_id: String,
