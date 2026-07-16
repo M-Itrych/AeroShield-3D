@@ -156,11 +156,12 @@ function GlobePage() {
           <FlightLayer
             flights={filteredFlights}
             risks={risks}
+            viewer={viewer}
             viewportBbox={bbox}
             selectedId={selectedId}
           />
         )}
-        {layers.airports && <AirportsLayer airports={airports} />}
+        {layers.airports && <AirportsLayer airports={airports} viewer={viewer} />}
         {layers.sigmets && (
           <HazardLayer sigmets={sigmets} selectedFlight={selectedFlight} />
         )}

@@ -121,10 +121,11 @@ function MobileGlobePage() {
         <FlightLayer
           flights={allFlights}
           risks={risks}
+          viewer={viewer}
           viewportBbox={bbox}
           selectedId={selectedId}
         />
-        <AirportsLayer airports={airports} />
+        <AirportsLayer airports={airports} viewer={viewer} />
         <HazardLayer sigmets={sigmets} selectedFlight={selectedFlight} />
         {selectedId && (
           <FlightTrailLayer trail={trailQuery.data?.trail ?? []} icao24={selectedId} />

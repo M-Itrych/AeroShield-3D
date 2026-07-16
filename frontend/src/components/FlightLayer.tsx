@@ -1,4 +1,4 @@
-import { Entity } from "resium";
+import { useEffect, useMemo, useRef } from "react";
 import {
   Cartesian3,
   Cartesian2,
@@ -7,11 +7,12 @@ import {
   VerticalOrigin,
   HorizontalOrigin,
   HeightReference,
-  DistanceDisplayCondition,
   Math as CesiumMath,
   type Viewer as CesiumViewer,
+  BillboardCollection,
+  LabelCollection,
+  DistanceDisplayCondition,
 } from "cesium";
-import { memo, useMemo } from "react";
 import type { FlightVector, RiskAssessment } from "@/types/domain";
 import type { BboxParams } from "@/hooks/use-viewport-bbox";
 import {
@@ -24,13 +25,12 @@ import {
 interface FlightLayerProps {
   flights: FlightVector[];
   risks?: RiskAssessment[];
-  onSelect?: (icao24: string) => void;
   viewer?: CesiumViewer | null;
   viewportBbox?: BboxParams;
   selectedId?: string | null;
 }
 
-const MAX_FLIGHTS = 500;
+const MAX_FLIGHTS = 200;
 
 const LABEL_FILL = Color.fromCssColorString("#e8eef2").withAlpha(0.92);
 const LABEL_OUTLINE = Color.fromCssColorString("#08080a").withAlpha(0.9);
@@ -39,8 +39,15 @@ const LABEL_BG = Color.fromCssColorString("#08080a").withAlpha(0.55);
 const LABEL_OFFSET = new Cartesian2(16, -10);
 const LABEL_PADDING = new Cartesian2(4, 2);
 
-const LABEL_NEAR_FAR = { near: 0, far: 3_000_000 } as const;
-const POINT_NEAR_FAR = { near: 0, far: 60_000_000 } as const;
+const LABEL_NEAR_FAR = new DistanceDisplayCondition(0, 3_000_000);
+const POINT_NEAR_FAR = new DistanceDisplayCondition(0, 60_000_000);
+
+const ICONS = {
+  lime: FLIGHT_ICON_LIME,
+  orange: FLIGHT_ICON_ORANGE,
+  limeDim: FLIGHT_ICON_LIME_DIM,
+  orangeDim: FLIGHT_ICON_ORANGE_DIM,
+} as const;
 
 function buildRiskMap(risks?: RiskAssessment[]): Map<string, RiskAssessment> {
   const m = new Map<string, RiskAssessment>();
@@ -78,113 +85,173 @@ function inBbox(f: FlightVector, b: BboxParams): boolean {
   );
 }
 
-export const FlightLayer = memo(function FlightLayer({
+interface PreparedFlight {
+  icao24: string;
+  lon: number;
+  lat: number;
+  alt: number;
+  heading: number | null;
+  callsign: string | null;
+  icao24Raw: string;
+  risk: RiskAssessment | undefined;
+  riskLevel: string;
+  isHigh: boolean;
+  isWarn: boolean;
+  icon: string;
+  scale: number;
+  showLabel: boolean;
+}
+
+function selectIcon(isHigh: boolean, isWarn: boolean, altFt: number): string {
+  if (isWarn) return isHigh ? ICONS.orange : ICONS.orangeDim;
+  return altFt > 30000 ? ICONS.lime : ICONS.limeDim;
+}
+
+export function FlightLayer({
   flights,
   risks,
+  viewer,
   viewportBbox,
   selectedId,
 }: FlightLayerProps) {
   const riskMap = useMemo(() => buildRiskMap(risks), [risks]);
 
-  const visible = useMemo(() => {
+  const billboardsRef = useRef<BillboardCollection | null>(null);
+  const labelsRef = useRef<LabelCollection | null>(null);
+
+  const prepared = useMemo<PreparedFlight[]>(() => {
     const deduped = dedupeByIcao(flights);
 
+    let pool: FlightVector[];
     if (!viewportBbox) {
-      return deduped.slice(0, MAX_FLIGHTS);
-    }
-
-    const inView = deduped.filter((f) => inBbox(f, viewportBbox));
-
-    if (inView.length <= MAX_FLIGHTS) return inView;
-
-    const high: FlightVector[] = [];
-    const med: FlightVector[] = [];
-    const rest: FlightVector[] = [];
-
-    for (const f of inView) {
-      const r = riskMap.get(f.icao24)?.risk ?? "NONE";
-      if (r === "HIGH") high.push(f);
-      else if (r === "MEDIUM") med.push(f);
-      else rest.push(f);
-    }
-
-    if (high.length >= MAX_FLIGHTS) return high.slice(0, MAX_FLIGHTS);
-
-    const result = [...high, ...med];
-    if (result.length >= MAX_FLIGHTS) return result.slice(0, MAX_FLIGHTS);
-
-    const remaining = MAX_FLIGHTS - result.length;
-    const stride = Math.max(1, Math.floor(rest.length / remaining));
-    const sampled = rest.filter((_, i) => i % stride === 0).slice(0, remaining);
-    return [...result, ...sampled];
-  }, [flights, riskMap, viewportBbox]);
-
-  return (
-    <>
-      {visible.map((f) => {
-        const alt = f.baro_altitude ?? 10000;
-        const position = Cartesian3.fromDegrees(f.longitude, f.latitude, alt);
-        const flightRisk = riskMap.get(f.icao24);
-        const riskLevel = flightRisk?.risk ?? "NONE";
-        const isHigh = riskLevel === "HIGH";
-        const isWarn = isHigh || riskLevel === "MEDIUM";
-        const isSelected = selectedId === f.icao24;
-
-        const altFt = (f.baro_altitude ?? 0) * 3.28084;
-        let icon: string;
-        if (isWarn) {
-          icon = isHigh ? FLIGHT_ICON_ORANGE : FLIGHT_ICON_ORANGE_DIM;
-        } else {
-          icon = altFt > 30000 ? FLIGHT_ICON_LIME : FLIGHT_ICON_LIME_DIM;
+      pool = deduped.slice(0, MAX_FLIGHTS);
+    } else {
+      const inView = deduped.filter((f) => inBbox(f, viewportBbox));
+      if (inView.length <= MAX_FLIGHTS) {
+        pool = inView;
+      } else {
+        const high: FlightVector[] = [];
+        const med: FlightVector[] = [];
+        const rest: FlightVector[] = [];
+        for (const f of inView) {
+          const r = riskMap.get(f.icao24)?.risk ?? "NONE";
+          if (r === "HIGH") high.push(f);
+          else if (r === "MEDIUM") med.push(f);
+          else rest.push(f);
         }
+        if (high.length >= MAX_FLIGHTS) {
+          pool = high.slice(0, MAX_FLIGHTS);
+        } else {
+          const result = [...high, ...med];
+          if (result.length >= MAX_FLIGHTS) {
+            pool = result.slice(0, MAX_FLIGHTS);
+          } else {
+            const remaining = MAX_FLIGHTS - result.length;
+            const stride = Math.max(1, Math.floor(rest.length / remaining));
+            const sampled = rest
+              .filter((_, i) => i % stride === 0)
+              .slice(0, remaining);
+            pool = [...result, ...sampled];
+          }
+        }
+      }
+    }
 
-        const scale = isHigh ? 0.85 : isWarn ? 0.7 : isSelected ? 0.75 : 0.55;
-        const rotation = f.heading != null ? -CesiumMath.toRadians(f.heading) : 0;
-        const showLabel = isWarn || isSelected;
+    return pool.map((f) => {
+      const flightRisk = riskMap.get(f.icao24);
+      const riskLevel = flightRisk?.risk ?? "NONE";
+      const isHigh = riskLevel === "HIGH";
+      const isWarn = isHigh || riskLevel === "MEDIUM";
+      const isSelected = selectedId === f.icao24;
+      const altFt = (f.baro_altitude ?? 0) * 3.28084;
+      const icon = selectIcon(isHigh, isWarn, altFt);
+      const scale = isHigh ? 0.85 : isWarn ? 0.7 : isSelected ? 0.75 : 0.55;
+      return {
+        icao24: f.icao24,
+        lon: f.longitude,
+        lat: f.latitude,
+        alt: f.baro_altitude ?? 10000,
+        heading: f.heading,
+        callsign: f.callsign,
+        icao24Raw: f.icao24,
+        risk: flightRisk,
+        riskLevel,
+        isHigh,
+        isWarn,
+        icon,
+        scale,
+        showLabel: isWarn || isSelected,
+      };
+    });
+  }, [flights, riskMap, viewportBbox, selectedId]);
 
-        return (
-          <Entity
-            key={f.icao24}
-            position={position}
-            id={f.icao24}
-            billboard={{
-              image: icon,
-              scale,
-              rotation,
-              disableDepthTestDistance: Number.POSITIVE_INFINITY,
-              heightReference: HeightReference.NONE,
-              distanceDisplayCondition: new DistanceDisplayCondition(
-                POINT_NEAR_FAR.near,
-                POINT_NEAR_FAR.far,
-              ),
-            }}
-            label={
-              showLabel
-                ? {
-                    text: tacticalLabel(f, flightRisk),
-                    font: '10px "JetBrains Mono", ui-monospace, monospace',
-                    fillColor: LABEL_FILL,
-                    outlineColor: LABEL_OUTLINE,
-                    outlineWidth: 2,
-                    style: LabelStyle.FILL_AND_OUTLINE,
-                    verticalOrigin: VerticalOrigin.CENTER,
-                    horizontalOrigin: HorizontalOrigin.LEFT,
-                    pixelOffset: LABEL_OFFSET,
-                    showBackground: true,
-                    backgroundColor: LABEL_BG,
-                    backgroundPadding: LABEL_PADDING,
-                    disableDepthTestDistance: Number.POSITIVE_INFINITY,
-                    heightReference: HeightReference.NONE,
-                    distanceDisplayCondition: new DistanceDisplayCondition(
-                      LABEL_NEAR_FAR.near,
-                      LABEL_NEAR_FAR.far,
-                    ),
-                  }
-                : undefined
-            }
-          />
-        );
-      })}
-    </>
-  );
-});
+  useEffect(() => {
+    if (!viewer) return;
+
+    const billboards = new BillboardCollection();
+    const labels = new LabelCollection();
+    viewer.scene.primitives.add(billboards);
+    viewer.scene.primitives.add(labels);
+    billboardsRef.current = billboards;
+    labelsRef.current = labels;
+
+    return () => {
+      viewer.scene.primitives.remove(billboards);
+      viewer.scene.primitives.remove(labels);
+      billboardsRef.current = null;
+      labelsRef.current = null;
+    };
+  }, [viewer]);
+
+  useEffect(() => {
+    const billboards = billboardsRef.current;
+    const labels = labelsRef.current;
+    if (!billboards || !labels) return;
+
+    billboards.removeAll();
+    labels.removeAll();
+
+    for (const f of prepared) {
+      const position = Cartesian3.fromDegrees(f.lon, f.lat, f.alt);
+      const rotation = f.heading != null ? -CesiumMath.toRadians(f.heading) : 0;
+
+      const bb = billboards.add({
+        image: f.icon,
+        position,
+        scale: f.scale,
+        rotation,
+        disableDepthTestDistance: Number.POSITIVE_INFINITY,
+        heightReference: HeightReference.NONE,
+        distanceDisplayCondition: POINT_NEAR_FAR,
+      });
+      bb.id = f.icao24;
+
+      if (f.showLabel) {
+        const lbl = labels.add({
+          position,
+          text: tacticalLabel(
+            { callsign: f.callsign, icao24: f.icao24Raw } as FlightVector,
+            f.risk,
+          ),
+          font: '10px "JetBrains Mono", ui-monospace, monospace',
+          fillColor: LABEL_FILL,
+          outlineColor: LABEL_OUTLINE,
+          outlineWidth: 2,
+          style: LabelStyle.FILL_AND_OUTLINE,
+          verticalOrigin: VerticalOrigin.CENTER,
+          horizontalOrigin: HorizontalOrigin.LEFT,
+          pixelOffset: LABEL_OFFSET,
+          showBackground: true,
+          backgroundColor: LABEL_BG,
+          backgroundPadding: LABEL_PADDING,
+          disableDepthTestDistance: Number.POSITIVE_INFINITY,
+          heightReference: HeightReference.NONE,
+          distanceDisplayCondition: LABEL_NEAR_FAR,
+        });
+        lbl.id = f.icao24;
+      }
+    }
+  }, [prepared]);
+
+  return null;
+}
