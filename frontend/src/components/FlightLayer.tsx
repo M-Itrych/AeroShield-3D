@@ -135,7 +135,7 @@ export function FlightLayer({
         }
 
         const scale = isHigh ? 0.85 : isWarn ? 0.7 : isSelected ? 0.75 : 0.55;
-        const rotation = f.heading != null ? CesiumMath.toRadians(f.heading) : 0;
+        const rotation = f.heading != null ? -CesiumMath.toRadians(f.heading) : 0;
         const showLabel = isWarn || isSelected;
 
         return (
