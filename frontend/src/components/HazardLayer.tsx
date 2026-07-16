@@ -1,5 +1,5 @@
 import { Entity } from "resium";
-import { Cartesian3, Color, PolygonHierarchy, ConstantProperty } from "cesium";
+import { Cartesian3, Color, PolygonHierarchy, ColorMaterialProperty } from "cesium";
 import type { HazardPolygon } from "@/types/domain";
 
 interface HazardLayerProps {
@@ -33,17 +33,15 @@ export function HazardLayer({ sigmets }: HazardLayerProps) {
           <Entity
             key={sig.sigmet_id}
             name={sig.hazard_type}
-            polygon={
-              {
-                hierarchy: new ConstantProperty(hierarchy),
-                material: new ConstantProperty(HAZARD_COLOR),
-                outline: new ConstantProperty(true),
-                outlineColor: new ConstantProperty(HAZARD_OUTLINE),
-                extrudedHeight: new ConstantProperty(maxAlt),
-                height: new ConstantProperty(minAlt),
-                fill: new ConstantProperty(true),
-              } as unknown as React.ComponentProps<typeof Entity>["polygon"]
-            }
+            polygon={{
+              hierarchy,
+              material: new ColorMaterialProperty(HAZARD_COLOR),
+              outline: true,
+              outlineColor: HAZARD_OUTLINE,
+              extrudedHeight: maxAlt,
+              height: minAlt,
+              fill: true,
+            }}
           />
         );
       })}

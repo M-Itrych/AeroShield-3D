@@ -1,4 +1,4 @@
-import { useRef, type ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import { Viewer as ResiumViewer } from "resium";
 import type { CesiumComponentRef } from "resium";
 import type { Viewer as CesiumViewer } from "cesium";
@@ -9,7 +9,13 @@ interface CesiumGlobeProps {
 }
 
 export function CesiumGlobe({ children, onReady }: CesiumGlobeProps) {
-  const ref = useRef<CesiumComponentRef<CesiumViewer>>(null);
+  const viewerRef = useRef<CesiumViewer | null>(null);
+
+  useEffect(() => {
+    return () => {
+      viewerRef.current?.destroy?.();
+    };
+  }, []);
 
   return (
     <div className="cesium-container">
@@ -25,10 +31,12 @@ export function CesiumGlobe({ children, onReady }: CesiumGlobeProps) {
         timeline={false}
         selectionIndicator={false}
         infoBox={false}
-        ref={(r) => {
-          ref.current = r;
+        ref={(r: CesiumComponentRef<CesiumViewer> | null) => {
           const el = r?.cesiumElement;
-          if (el) onReady?.(el);
+          if (el) {
+            viewerRef.current = el;
+            onReady?.(el);
+          }
         }}
       >
         {children}
