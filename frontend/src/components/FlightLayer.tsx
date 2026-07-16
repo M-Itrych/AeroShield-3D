@@ -176,12 +176,12 @@ export function FlightLayer({
         ? ICONS.orange
         : selectIcon(isHigh, isWarn, altFt);
       const scale = isSelected
-        ? 1.1
+        ? 1.5
         : isHigh
-          ? 0.85
+          ? 1.2
           : isWarn
-            ? 0.7
-            : 0.5;
+            ? 1.0
+            : 0.8;
       return {
         icao24: f.icao24,
         lon: f.longitude,
