@@ -25,44 +25,9 @@ export function ThemeToggle() {
     window.localStorage.setItem("theme", theme);
   }, [theme]);
 
-  const toggle = useCallback(
-    (e: React.MouseEvent<HTMLButtonElement>) => {
-      const next: Theme = theme === "dark" ? "light" : "dark";
-
-      // Circular reveal wipe from the click point (view-transition API).
-      const doc = document as Document & {
-        startViewTransition?: (cb: () => void) => {
-          finished: Promise<void>;
-        };
-      };
-      const setThemeNow = () => setTheme(next);
-
-      if (!doc.startViewTransition) {
-        setThemeNow();
-        return;
-      }
-
-      const rect = e.currentTarget.getBoundingClientRect();
-      const x = rect.left + rect.width / 2;
-      const y = rect.top + rect.height / 2;
-      const maxR = Math.hypot(
-        Math.max(x, window.innerWidth - x),
-        Math.max(y, window.innerHeight - y),
-      );
-      const root = document.documentElement;
-      root.style.setProperty("--theme-x", `${x}px`);
-      root.style.setProperty("--theme-y", `${y}px`);
-      root.style.setProperty("--theme-r", `${maxR}px`);
-
-      const transition = doc.startViewTransition(setThemeNow);
-      transition.finished.finally(() => {
-        root.style.removeProperty("--theme-x");
-        root.style.removeProperty("--theme-y");
-        root.style.removeProperty("--theme-r");
-      });
-    },
-    [theme],
-  );
+  const toggle = useCallback(() => {
+    setTheme((prev) => (prev === "dark" ? "light" : "dark"));
+  }, []);
 
   const toDark = theme === "light";
 
@@ -74,7 +39,7 @@ export function ThemeToggle() {
     >
       {/* Cross-fade: both icons stay in DOM, absolutely stacked. */}
       <Sun
-        className={`absolute size-3.5 transition-all duration-200 ${
+        className={`absolute size-3.5 transition-[transform,opacity] duration-200 ${
           toDark
             ? "scale-100 opacity-100 rotate-0"
             : "scale-50 opacity-0 rotate-90"
@@ -82,7 +47,7 @@ export function ThemeToggle() {
         style={{ transitionTimingFunction: toDark ? "cubic-bezier(0.2,0,0,1)" : "cubic-bezier(0.4,0,1,1)" }}
       />
       <Moon
-        className={`absolute size-3.5 transition-all duration-200 ${
+        className={`absolute size-3.5 transition-[transform,opacity] duration-200 ${
           toDark
             ? "scale-50 opacity-0 -rotate-90"
             : "scale-100 opacity-100 rotate-0"

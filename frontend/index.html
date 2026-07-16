@@ -104,6 +104,13 @@
           setTimeout(function() { el.remove(); }, 200);
         }
       };
+      // Hard safety net: never let the boot screen stay up forever, even if
+      // React fails to mount or BootSequence never reaches its fadeout phase.
+      setTimeout(function() {
+        if (document.getElementById("boot-screen")) {
+          window.__removeBootScreen && window.__removeBootScreen();
+        }
+      }, 12000);
     </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>

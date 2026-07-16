@@ -138,8 +138,8 @@ export function CesiumGlobe({ children, onReady }: CesiumGlobeProps) {
           }
         }}
       >
-        <ImageryLayer imageryProvider={baseProvider} />
-        <ImageryLayer imageryProvider={labelsProvider} />
+        <ImageryLayer key={`base-${theme}`} imageryProvider={baseProvider} />
+        <ImageryLayer key={`labels-${theme}`} imageryProvider={labelsProvider} />
         {children}
       </ResiumViewer>
     </div>
