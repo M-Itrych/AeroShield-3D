@@ -7,6 +7,7 @@ import { HazardLayer } from "@/components/HazardLayer";
 import { FlightTrailLayer } from "@/components/FlightTrailLayer";
 import { RouteLineLayer } from "@/components/RouteLineLayer";
 import { FlightPredictLayer } from "@/components/FlightPredictLayer";
+import { RerouteLayer } from "@/components/RerouteLayer";
 import { AirportsLayer } from "@/components/AirportsLayer";
 import { FlightDetailPanel } from "@/components/FlightDetailPanel";
 import { GlobeControlBar, type LayerVisibility } from "@/components/GlobeControlBar";
@@ -16,6 +17,7 @@ import { HazardPanel } from "@/components/HazardPanel";
 import { useFlights } from "@/hooks/use-flights";
 import { useSigmets } from "@/hooks/use-sigmets";
 import { useAirports } from "@/hooks/use-airports";
+import { useRiskStream } from "@/hooks/use-risk-stream";
 import { useViewportBbox } from "@/hooks/use-viewport-bbox";
 import { useFlightTrail } from "@/hooks/use-flight-trail";
 import { useFlightRoute } from "@/hooks/use-flight-route";
@@ -24,7 +26,7 @@ import { useGlobeClick } from "@/hooks/use-globe-click";
 import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
 import { useAutoRotate } from "@/hooks/use-auto-rotate";
 import { resetView, focusSigmet } from "@/lib/camera-utils";
-import type { RiskAssessment, FlightVector } from "@/types/domain";
+import type { FlightVector } from "@/types/domain";
 
 export const Route = createFileRoute("/")({
   component: GlobePage,
@@ -54,11 +56,10 @@ function GlobePage() {
   const flightsQuery = useFlights(riskFilter);
   const sigmetsQuery = useSigmets();
   const airportsQuery = useAirports();
+  const { risks, connectionState } = useRiskStream();
 
   const sigmets = sigmetsQuery.data?.sigmets ?? [];
   const airports = airportsQuery.data ?? [];
-
-  const risks: RiskAssessment[] = useMemo(() => [], []);
 
   const filteredFlights = useMemo(() => {
     const allFlights = flightsQuery.data?.flights ?? [];
@@ -155,12 +156,15 @@ function GlobePage() {
           <FlightLayer
             flights={filteredFlights}
             risks={risks}
+            viewer={viewer}
             viewportBbox={bbox}
             selectedId={selectedId}
           />
         )}
-        {layers.airports && <AirportsLayer airports={airports} />}
-        {layers.sigmets && <HazardLayer sigmets={sigmets} />}
+        {layers.airports && <AirportsLayer airports={airports} viewer={viewer} />}
+        {layers.sigmets && (
+          <HazardLayer sigmets={sigmets} selectedFlight={selectedFlight} />
+        )}
         {layers.trails && selectedId && (
           <FlightTrailLayer trail={trailQuery.data?.trail ?? []} icao24={selectedId} />
         )}
@@ -173,12 +177,21 @@ function GlobePage() {
             route={routeQuery.data ?? null}
           />
         )}
+        {layers.routes && selectedFlight && selectedRisk?.risk === "HIGH" && (
+          <RerouteLayer
+            flight={selectedFlight}
+            route={routeQuery.data ?? null}
+            sigmets={sigmets}
+            risk={selectedRisk ?? null}
+          />
+        )}
       </CesiumGlobe>
 
       <HudBar
         flightCount={filteredFlights.length}
         sigmetCount={sigmets.length}
         highRiskCount={highRiskCount}
+        riskConnectionState={connectionState}
       />
 
       <FlightsPanel
@@ -211,6 +224,7 @@ function GlobePage() {
         flight={selectedFlight}
         route={routeQuery.data ?? null}
         risk={selectedRisk ?? undefined}
+        sigmets={sigmets}
         onClose={handleDeselect}
         onFollow={() => setFollowMode((v) => !v)}
         followMode={followMode}

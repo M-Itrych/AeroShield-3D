@@ -18,11 +18,29 @@ pub struct Bbox {
     pub lomax: f64,
 }
 
+impl Bbox {
+    fn rounded_key(self) -> (i32, i32, i32, i32) {
+        (
+            self.lamin.floor() as i32,
+            self.lamax.ceil() as i32,
+            self.lomin.floor() as i32,
+            self.lomax.ceil() as i32,
+        )
+    }
+}
+
+async fn backoff_sleep(attempt: u32) {
+    let delay = Duration::from_millis(500 * 2u64.pow(attempt.min(4)));
+    tokio::time::sleep(delay).await;
+}
+
 pub struct OpenSkyClient {
     client: reqwest::Client,
     base: String,
     auth: Option<(String, String)>,
     cache: Cache<(), Vec<FlightVector>>,
+    bbox_cache: Cache<(i32, i32, i32, i32), Vec<FlightVector>>,
+    route_cache: Cache<String, Option<crate::models::FlightRoute>>,
 }
 
 impl OpenSkyClient {
@@ -35,6 +53,14 @@ impl OpenSkyClient {
             .time_to_live(Duration::from_secs(60))
             .max_capacity(1)
             .build();
+        let bbox_cache = Cache::builder()
+            .time_to_live(Duration::from_secs(30))
+            .max_capacity(64)
+            .build();
+        let route_cache = Cache::builder()
+            .time_to_live(Duration::from_secs(300))
+            .max_capacity(500)
+            .build();
         Self {
             client: reqwest::Client::builder()
                 .timeout(Duration::from_secs(15))
@@ -43,6 +69,8 @@ impl OpenSkyClient {
             base: base.to_string(),
             auth,
             cache,
+            bbox_cache,
+            route_cache,
         }
     }
 
@@ -53,35 +81,56 @@ impl OpenSkyClient {
         }
 
         let url = format!("{}/states/all", self.base);
-        let mut req = self.client.get(&url);
-        if let Some((user, pass)) = &self.auth {
-            req = req.basic_auth(user, Some(pass));
+        let mut last_err: Option<anyhow::Error> = None;
+
+        for attempt in 0u32..3 {
+            let mut req = self.client.get(&url);
+            if let Some((user, pass)) = &self.auth {
+                req = req.basic_auth(user, Some(pass));
+            }
+
+            let resp = match req.send().await {
+                Ok(r) => r,
+                Err(e) => {
+                    last_err = Some(e.into());
+                    backoff_sleep(attempt).await;
+                    continue;
+                }
+            };
+
+            let status = resp.status();
+            if status.as_u16() == 429 {
+                tracing::warn!("opensky rate limited, backing off (attempt {attempt})");
+                backoff_sleep(attempt).await;
+                continue;
+            }
+            if !status.is_success() {
+                anyhow::bail!("opensky error: {status}");
+            }
+
+            let body: OpenSkyResponse = resp.json().await?;
+            let flights: Vec<FlightVector> = body
+                .states
+                .unwrap_or_default()
+                .into_iter()
+                .filter_map(parse_state)
+                .collect();
+
+            self.cache.insert((), flights.clone()).await;
+            tracing::info!("opensky fetched {} flights", flights.len());
+            return Ok(flights);
         }
 
-        let resp = req.send().await?;
-        let status = resp.status();
-        if status.as_u16() == 429 {
-            tracing::warn!("opensky rate limited");
-            return Ok(Vec::new());
-        }
-        if !status.is_success() {
-            anyhow::bail!("opensky error: {status}");
-        }
-
-        let body: OpenSkyResponse = resp.json().await?;
-        let flights: Vec<FlightVector> = body
-            .states
-            .unwrap_or_default()
-            .into_iter()
-            .filter_map(parse_state)
-            .collect();
-
-        self.cache.insert((), flights.clone()).await;
-        tracing::info!("opensky fetched {} flights", flights.len());
-        Ok(flights)
+        Err(last_err.unwrap_or_else(|| anyhow::anyhow!("opensky exhausted retries")))
     }
 
     pub async fn fetch_states_bbox(&self, bbox: Bbox) -> anyhow::Result<Vec<FlightVector>> {
+        let key = bbox.rounded_key();
+        if let Some(cached) = self.bbox_cache.get(&key).await {
+            tracing::debug!("opensky bbox cache hit");
+            return Ok(cached);
+        }
+
         let url = format!("{}/states/all", self.base);
         let mut req = self.client.get(&url).query(&[
             ("lamin", bbox.lamin.to_string()),
@@ -111,6 +160,7 @@ impl OpenSkyClient {
             .filter_map(parse_state)
             .collect();
 
+        self.bbox_cache.insert(key, flights.clone()).await;
         tracing::info!("opensky bbox fetched {} flights", flights.len());
         Ok(flights)
     }
@@ -125,6 +175,10 @@ impl OpenSkyClient {
         begin: u64,
         end: u64,
     ) -> anyhow::Result<Option<crate::models::FlightRoute>> {
+        if let Some(cached) = self.route_cache.get(icao24).await {
+            return Ok(cached);
+        }
+
         let url = format!("{}/flights/aircraft", self.base);
         let mut req = self.client.get(&url).query(&[
             ("icao24", icao24),
@@ -148,7 +202,7 @@ impl OpenSkyClient {
         let flights: Vec<AircraftFlight> = resp.json().await?;
         let latest = flights.into_iter().max_by_key(|f| f.last_seen.unwrap_or(0));
 
-        Ok(latest.map(|f| crate::models::FlightRoute {
+        let result = latest.map(|f| crate::models::FlightRoute {
             icao24: icao24.to_string(),
             callsign: f.callsign.filter(|c| !c.is_empty()),
             departure: f.est_departure_airport,
@@ -157,7 +211,12 @@ impl OpenSkyClient {
             last_seen: f.last_seen,
             departure_airport: None,
             arrival_airport: None,
-        }))
+        });
+
+        self.route_cache
+            .insert(icao24.to_string(), result.clone())
+            .await;
+        Ok(result)
     }
 }
 

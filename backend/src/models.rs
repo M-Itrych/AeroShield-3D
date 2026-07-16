@@ -49,6 +49,8 @@ pub struct RiskAssessment {
     pub alt_ft: Option<f64>,
     pub risk: RiskLevel,
     pub sigmet_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub minutes_to_impact: Option<f64>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

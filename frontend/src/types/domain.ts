@@ -28,6 +28,7 @@ export interface RiskAssessment {
   alt_ft: number | null;
   risk: RiskLevel;
   sigmet_id: string | null;
+  minutes_to_impact?: number | null;
 }
 
 export interface TrailPoint {
