@@ -160,7 +160,9 @@ function GlobePage() {
           />
         )}
         {layers.airports && <AirportsLayer airports={airports} />}
-        {layers.sigmets && <HazardLayer sigmets={sigmets} />}
+        {layers.sigmets && (
+          <HazardLayer sigmets={sigmets} selectedFlight={selectedFlight} />
+        )}
         {layers.trails && selectedId && (
           <FlightTrailLayer trail={trailQuery.data?.trail ?? []} icao24={selectedId} />
         )}

@@ -6,46 +6,87 @@ import {
   ColorMaterialProperty,
   HeightReference,
   ArcType,
+  ConstantProperty,
 } from "cesium";
-import type { HazardPolygon } from "@/types/domain";
+import { useMemo } from "react";
+import type { HazardPolygon, FlightVector } from "@/types/domain";
 
 interface HazardLayerProps {
   sigmets: HazardPolygon[];
+  selectedFlight?: FlightVector | null;
 }
 
-const HAZARD_FILL = Color.fromCssColorString("#ff5f1f").withAlpha(0.12);
-const HAZARD_OUTLINE = Color.fromCssColorString("#ff5f1f").withAlpha(0.7);
+const FT_TO_M = 0.3048;
+const GROUND_FT = 0;
 
-export function HazardLayer({ sigmets }: HazardLayerProps) {
-  return (
-    <>
-      {sigmets.map((sig) => {
+const HAZARD_FILL_FULL = Color.fromCssColorString("#ff5f1f").withAlpha(0.12);
+const HAZARD_OUTLINE_FULL = Color.fromCssColorString("#ff5f1f").withAlpha(0.7);
+const HAZARD_FILL_DIM = Color.fromCssColorString("#ff5f1f").withAlpha(0.04);
+const HAZARD_OUTLINE_DIM = Color.fromCssColorString("#ff5f1f").withAlpha(0.2);
+
+const DEFAULT_MIN_FT = 0;
+const DEFAULT_MAX_FT = 60000;
+
+function altBandIntersectsFlight(
+  sig: HazardPolygon,
+  flightAltFt: number | null,
+): boolean {
+  if (flightAltFt == null) return true;
+  const min = sig.min_ft ?? DEFAULT_MIN_FT;
+  const max = sig.max_ft ?? DEFAULT_MAX_FT;
+  return flightAltFt >= min && flightAltFt <= max;
+}
+
+export function HazardLayer({ sigmets, selectedFlight }: HazardLayerProps) {
+  const flightAltFt = selectedFlight?.baro_altitude
+    ? selectedFlight.baro_altitude * 3.28084
+    : null;
+
+  const entities = useMemo(
+    () =>
+      sigmets.map((sig) => {
         const coords: number[] = [];
         for (const [lon, lat] of sig.points) {
           coords.push(lon, lat);
         }
 
+        const minFt = sig.min_ft ?? GROUND_FT;
+        const maxFt = sig.max_ft ?? DEFAULT_MAX_FT;
+        const minM = minFt * FT_TO_M;
+        const maxM = maxFt * FT_TO_M;
+
+        const intersects = altBandIntersectsFlight(sig, flightAltFt);
+        const fill = intersects ? HAZARD_FILL_FULL : HAZARD_FILL_DIM;
+        const outline = intersects ? HAZARD_OUTLINE_FULL : HAZARD_OUTLINE_DIM;
+
         const hierarchy = new PolygonHierarchy(
           Cartesian3.fromDegreesArray(coords),
         );
+
+        const extrudedHeightProp = new ConstantProperty(maxM);
 
         return (
           <Entity
             key={sig.sigmet_id}
             id={sig.sigmet_id}
-            name={`SIGMET ${sig.sigmet_id} (${sig.hazard_type})`}
+            name={`SIGMET ${sig.sigmet_id} (${sig.hazard_type}) FL${Math.round(minFt / 100)}-FL${Math.round(maxFt / 100)}`}
             polygon={{
               hierarchy,
-              material: new ColorMaterialProperty(HAZARD_FILL),
+              material: new ColorMaterialProperty(fill),
               outline: true,
-              outlineColor: HAZARD_OUTLINE,
-              heightReference: HeightReference.CLAMP_TO_GROUND,
+              outlineColor: outline,
+              height: minM,
+              extrudedHeight: extrudedHeightProp,
+              heightReference: HeightReference.NONE,
               fill: true,
               arcType: ArcType.GEODESIC,
             }}
           />
         );
-      })}
-    </>
+      }),
+    [sigmets, flightAltFt],
   );
+
+  return <>{entities}</>;
 }
+
