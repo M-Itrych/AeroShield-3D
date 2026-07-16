@@ -122,6 +122,10 @@ export function FlightLayer({
   const prepared = useMemo<PreparedFlight[]>(() => {
     const deduped = dedupeByIcao(flights);
 
+    const selected = selectedId
+      ? deduped.find((f) => f.icao24 === selectedId)
+      : undefined;
+
     let pool: FlightVector[];
     if (!viewportBbox) {
       pool = deduped.slice(0, MAX_FLIGHTS);
@@ -157,6 +161,10 @@ export function FlightLayer({
       }
     }
 
+    if (selected && !pool.some((f) => f.icao24 === selectedId)) {
+      pool.push(selected);
+    }
+
     return pool.map((f) => {
       const flightRisk = riskMap.get(f.icao24);
       const riskLevel = flightRisk?.risk ?? "NONE";
@@ -164,8 +172,16 @@ export function FlightLayer({
       const isWarn = isHigh || riskLevel === "MEDIUM";
       const isSelected = selectedId === f.icao24;
       const altFt = (f.baro_altitude ?? 0) * 3.28084;
-      const icon = selectIcon(isHigh, isWarn, altFt);
-      const scale = isHigh ? 0.85 : isWarn ? 0.7 : isSelected ? 0.75 : 0.55;
+      const icon = isSelected
+        ? ICONS.orange
+        : selectIcon(isHigh, isWarn, altFt);
+      const scale = isSelected
+        ? 1.1
+        : isHigh
+          ? 0.85
+          : isWarn
+            ? 0.7
+            : 0.5;
       return {
         icao24: f.icao24,
         lon: f.longitude,
