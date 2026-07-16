@@ -60,3 +60,28 @@ pub struct Airport {
     pub latitude: f64,
     pub longitude: f64,
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct FlightRoute {
+    pub icao24: String,
+    pub callsign: Option<String>,
+    pub departure: Option<String>,
+    pub arrival: Option<String>,
+    pub first_seen: Option<u64>,
+    pub last_seen: Option<u64>,
+    pub departure_airport: Option<Airport>,
+    pub arrival_airport: Option<Airport>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct MetarReport {
+    pub icao: String,
+    pub raw_ob: Option<String>,
+    pub temp_c: Option<f64>,
+    pub dewpoint_c: Option<f64>,
+    pub wind_dir: Option<i32>,
+    pub wind_speed_kt: Option<i32>,
+    pub visibility_sm: Option<f64>,
+    pub flight_category: Option<String>,
+    pub obs_time: Option<u64>,
+}

@@ -72,16 +72,38 @@ Caching & rate limits: OpenSky anonymous = 400 req/day, 100 req/5min. Poll every
 - `gh_grep` — search real GitHub code for patterns (SIGMET polygon parsing, Cesium extruded polygons, OpenSky state-vector handling). Use when you need a concrete reference implementation.
 - Invoke in prompts with `use context7` / `use gh_grep`.
 
-## 7. Frontend Visual Style — "Dark Cyber-Radar"
+## 7. Frontend Visual Style — "Tactical HUD / Cybernetic Telemetry"
 
-- Background: near-black radar screen (`#05070a` / `oklch(15% 0.02 240)`).
-- Primary grid: subtle cyan-green CRT glow (`#12ffaa` / `oklch(85% 0.18 160)`).
-- Hazard zones: crimson volumetric translucent red (`#ff3358` / `oklch(65% 0.22 25)`, alpha 0.18).
-- At-risk flights: pulsing red glow ring around sprite.
-- Safe flights: amber/off-white plane icons.
-- Use shadcn/ui dark theme tokens as the base, override with Tailwind v4 CSS variables in `frontend/src/styles/globals.css`.
-- All borders: `border-cyan-500/15`. Monospace font: `ui-monospace, "JetBrains Mono", monospace`.
-- Apply CRT scanline overlay (very subtle 4% opacity) on the globe container only.
+The aesthetic is a dark, high-tech, military-grade tactical HUD. Strictly two
+neon accent colors over a near-black charcoal space environment. No other
+accent hues are permitted without explicit approval.
+
+### Palette (canonical — do NOT deviate)
+
+| Token | CSS Var / Hex | Usage |
+|-------|---------------|-------|
+| Space background | `#08080a` / `--background` | App + globe void background, star-field base |
+| Globe charcoal | `#121315` / `hud.charcoal` | 3D globe base color ( minimalist sphere ) |
+| Continent shapes | `#1c1d21` / `hud.continent` | Flat muted landmasses via dark imagery tiles |
+| Electric lime grid | `#39ff14` / `hud.grid` / `--primary` | Safe tracks, routes, active panel states, reticle cores |
+| Warning orange | `#ff5f1f` / `hud.warn` / `--accent` / `--destructive` | Hazards, at-risk tracks, SIGMETs, critical alerts |
+| Ink ( primary text ) | `#b8c4cc` / `hud.ink` | Body text, label values |
+| Dim ( muted text ) | `#5a6770` / `hud.dim` | Captions, metadata, placeholders |
+
+### Hard rules
+
+- **Two-neon discipline**: the only saturated colors are lime `#39ff14` and orange `#ff5f1f`. Do NOT introduce blue, cyan, amber, red, or any other hue for data/UI distinction. Departures were a flaw in the prior "cyber-radar" theme and have been removed.
+- **Background**: deep near-black space `#08080a` with the sparse `starfield-bg` class on the root layout ( subtle pixel star-field, no gradients/atmosphere ).
+- **Globe**: minimalist dark charcoal sphere ( `globe.baseColor = #121315` ), sky/sun/moon/atmosphere disabled, continents rendered as flat dark gray `#1c1d21` via CARTO dark-no-labels tiles.
+- **Markers**: flight tracks are heading-rotated triangle billboards ( `BillboardGraphics` with inline SVG triangle, `rotation` = OpenSky heading in radians ) pointing in the direction of travel. Safe = lime, at-risk ( HIGH/MEDIUM ) = orange with larger scale. Airport dep/arr endpoints use reticle point markers ( departure = lime, arrival = orange ).
+- **Marker labels**: small clean white sans-serif text ( `#e8eef2`, 92% alpha ) with dark background pill, placed offset right of the marker via Cesium `LabelGraphics`. Callsigns preferred ( suffixed with last-4 ICAO24 hex to disambiguate duplicates ); fall back to `SYS-<icao6>` system-point IDs.
+- **Trails**: flight trails are rendered as per-segment polylines color-coded by altitude — muted lime/dim below 10k ft, bright lime 10k–25k, orange 25k–40k, bright orange above 40k. Semantic meaning: altitude read at a glance via color.
+- **Typography**: everything is monospaced — `ui-monospace, "JetBrains Mono", "Roboto Mono", monospace`. Ultra-thin, sharp, tracked-out letter-spacing ( `tracking-[0.16em]` to `0.2em]` ) on labels and headings.
+- **Borders**: ultra-thin ( 1px ), tinted from the neon tokens at low alpha — `border-hud-grid/20` for structural borders, `border-hud-warn/20` for hazard-region borders. No rounded corners beyond `--radius: 0.125rem` ( near-square ).
+- **Panels**: `bg-hud-space/90 backdrop-blur-md` over the star-field, with thin neon-tinted borders. No drop shadows — the "depth" comes from backdrop blur and the star-field behind.
+- **CRT scanlines**: removed per user request — the globe container has no scanline overlay. The `.cesium-container::after` rule has been deleted from `globals.css`. Do not reintroduce.
+- **Animations**: `status-blink` ( 1.6s pulse for status dots ), `pulse-ring` ( sonar expand for system status ), `reticle-spin` ( 6s slow rotation, reserved for future targeting overlays ). Keep motion sparse and mechanical.
+- shadcn/ui dark-theme tokens remain the base, overridden via CSS variables in `frontend/src/styles/globals.css`. Tailwind `hud.*` custom colors are the source of truth for tactical surfaces.
 
 ## 8. Spatial Computation Rules (Backend)
 

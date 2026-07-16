@@ -10,6 +10,14 @@ struct OpenSkyResponse {
     states: Option<Vec<Vec<serde_json::Value>>>,
 }
 
+#[derive(Debug, Clone, Copy)]
+pub struct Bbox {
+    pub lamin: f64,
+    pub lamax: f64,
+    pub lomin: f64,
+    pub lomax: f64,
+}
+
 pub struct OpenSkyClient {
     client: reqwest::Client,
     base: String,
@@ -73,9 +81,93 @@ impl OpenSkyClient {
         Ok(flights)
     }
 
+    pub async fn fetch_states_bbox(&self, bbox: Bbox) -> anyhow::Result<Vec<FlightVector>> {
+        let url = format!("{}/states/all", self.base);
+        let mut req = self.client.get(&url).query(&[
+            ("lamin", bbox.lamin.to_string()),
+            ("lamax", bbox.lamax.to_string()),
+            ("lomin", bbox.lomin.to_string()),
+            ("lomax", bbox.lomax.to_string()),
+        ]);
+        if let Some((user, pass)) = &self.auth {
+            req = req.basic_auth(user, Some(pass));
+        }
+
+        let resp = req.send().await?;
+        let status = resp.status();
+        if status.as_u16() == 429 {
+            tracing::warn!("opensky rate limited (bbox)");
+            return Ok(Vec::new());
+        }
+        if !status.is_success() {
+            anyhow::bail!("opensky bbox error: {status}");
+        }
+
+        let body: OpenSkyResponse = resp.json().await?;
+        let flights: Vec<FlightVector> = body
+            .states
+            .unwrap_or_default()
+            .into_iter()
+            .filter_map(parse_state)
+            .collect();
+
+        tracing::info!("opensky bbox fetched {} flights", flights.len());
+        Ok(flights)
+    }
+
     pub async fn fetch_states_or_cached(&self) -> Vec<FlightVector> {
         self.fetch_states().await.unwrap_or_default()
     }
+
+    pub async fn fetch_aircraft_route(
+        &self,
+        icao24: &str,
+        begin: u64,
+        end: u64,
+    ) -> anyhow::Result<Option<crate::models::FlightRoute>> {
+        let url = format!("{}/flights/aircraft", self.base);
+        let mut req = self.client.get(&url).query(&[
+            ("icao24", icao24),
+            ("begin", &begin.to_string()),
+            ("end", &end.to_string()),
+        ]);
+        if let Some((user, pass)) = &self.auth {
+            req = req.basic_auth(user, Some(pass));
+        }
+
+        let resp = req.send().await?;
+        let status = resp.status();
+        if status.as_u16() == 429 {
+            tracing::warn!("opensky rate limited (aircraft route)");
+            return Ok(None);
+        }
+        if !status.is_success() {
+            anyhow::bail!("opensky aircraft route error: {status}");
+        }
+
+        let flights: Vec<AircraftFlight> = resp.json().await?;
+        let latest = flights.into_iter().max_by_key(|f| f.last_seen.unwrap_or(0));
+
+        Ok(latest.map(|f| crate::models::FlightRoute {
+            icao24: icao24.to_string(),
+            callsign: f.callsign.filter(|c| !c.is_empty()),
+            departure: f.est_departure_airport,
+            arrival: f.est_arrival_airport,
+            first_seen: f.first_seen,
+            last_seen: f.last_seen,
+            departure_airport: None,
+            arrival_airport: None,
+        }))
+    }
+}
+
+#[derive(Debug, Deserialize)]
+struct AircraftFlight {
+    first_seen: Option<u64>,
+    last_seen: Option<u64>,
+    callsign: Option<String>,
+    est_departure_airport: Option<String>,
+    est_arrival_airport: Option<String>,
 }
 
 fn parse_state(s: Vec<serde_json::Value>) -> Option<FlightVector> {

@@ -16,7 +16,7 @@ export function HudBar({ flightCount, sigmetCount, highRiskCount }: HudBarProps)
       const h = String(d.getUTCHours()).padStart(2, "0");
       const m = String(d.getUTCMinutes()).padStart(2, "0");
       const s = String(d.getUTCSeconds()).padStart(2, "0");
-      setUtc(`${h}:${m}:${s} UTC`);
+      setUtc(`${h}:${m}:${s}Z`);
     };
     update();
     const id = setInterval(update, 1000);
@@ -24,30 +24,40 @@ export function HudBar({ flightCount, sigmetCount, highRiskCount }: HudBarProps)
   }, []);
 
   return (
-    <header className="absolute left-0 right-0 top-0 z-40 flex items-center justify-between border-b border-cyan-500/15 bg-black/60 px-4 py-2 backdrop-blur-sm">
-      <div className="flex items-center gap-3">
-        <div className="flex items-center gap-2">
-          <div className="size-2 animate-status-blink rounded-full bg-radar-grid" />
-          <span className="font-mono text-sm font-bold tracking-wider text-radar-grid">
-            AEROSHIELD 3D
+    <header className="absolute left-0 right-0 top-0 z-40 flex h-9 items-center justify-between border-b border-hud-grid/20 bg-hud-space/90 px-2 backdrop-blur-md sm:px-4">
+      <div className="flex items-center gap-2 sm:gap-3">
+        <div className="flex items-center gap-1.5">
+          <span className="relative flex size-2">
+            <span className="absolute inline-flex h-full w-full animate-pulse-ring rounded-full border border-hud-grid/70" />
+            <span className="relative inline-flex size-2 rounded-full bg-hud-grid" />
+          </span>
+          <span className="font-mono text-[11px] font-bold tracking-[0.16em] text-hud-grid sm:text-xs">
+            AEROSHIELD
+          </span>
+          <span className="ml-1 hidden font-mono text-[9px] tracking-[0.2em] text-hud-dim sm:inline">
+            TACTICAL TELEMETRY
           </span>
         </div>
-        <span className="text-xs text-muted-foreground">|</span>
-        <span className="font-mono text-xs text-muted-foreground">
-          Real-Time Aviation Hazard & Routing Analyzer
-        </span>
       </div>
 
-      <div className="flex items-center gap-3">
-        <Stat label="FLIGHTS" value={flightCount} />
-        <Stat label="SIGMETS" value={sigmetCount} color="text-radar-hazard" />
+      <div className="flex items-center gap-2 sm:gap-3">
+        <Stat label="TRACKS" value={flightCount} />
+        <span className="h-3 w-px bg-hud-grid/15" />
+        <Stat label="HAZARDS" value={sigmetCount} color="text-hud-warn" />
         {highRiskCount !== undefined && highRiskCount > 0 && (
-          <Badge variant="destructive" className="font-mono">
-            {highRiskCount} HIGH RISK
-          </Badge>
+          <>
+            <span className="h-3 w-px bg-hud-warn/20" />
+            <Badge variant="destructive" className="font-mono text-[9px]">
+              {highRiskCount} CRIT
+            </Badge>
+          </>
         )}
-        <span className="font-mono text-xs tabular-nums text-muted-foreground">
+        <span className="h-3 w-px bg-hud-grid/15" />
+        <span className="font-mono text-[10px] tabular-nums tracking-wider text-hud-ink sm:text-xs">
           {utc}
+        </span>
+        <span className="ml-1 hidden font-mono text-[9px] tracking-[0.2em] text-hud-dim md:inline">
+          UTC
         </span>
       </div>
     </header>
@@ -57,7 +67,7 @@ export function HudBar({ flightCount, sigmetCount, highRiskCount }: HudBarProps)
 function Stat({
   label,
   value,
-  color = "text-radar-grid",
+  color = "text-hud-grid",
 }: {
   label: string;
   value: number;
@@ -65,9 +75,13 @@ function Stat({
 }) {
   return (
     <div className="flex items-center gap-1.5">
-      <span className="font-mono text-xs text-muted-foreground">{label}</span>
-      <span className={`font-mono text-sm font-bold tabular-nums ${color}`}>
-        {value}
+      <span className="font-mono text-[8px] tracking-[0.15em] text-hud-dim sm:text-[9px]">
+        {label}
+      </span>
+      <span
+        className={`font-mono text-[11px] font-bold tabular-nums sm:text-xs ${color}`}
+      >
+        {String(value).padStart(3, "0")}
       </span>
     </div>
   );

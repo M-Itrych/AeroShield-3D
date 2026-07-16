@@ -1,4 +1,4 @@
-use crate::models::HazardPolygon;
+use crate::models::{HazardPolygon, MetarReport};
 use serde::Deserialize;
 use std::time::Duration;
 
@@ -56,6 +56,34 @@ impl AviationWeatherClient {
     pub async fn fetch_sigmets_or_cached(&self) -> Vec<HazardPolygon> {
         self.fetch_sigmets().await.unwrap_or_default()
     }
+
+    pub async fn fetch_metar(&self, icao: &str) -> anyhow::Result<Option<MetarReport>> {
+        let url = format!("{}/metar", self.base);
+        let resp = self
+            .client
+            .get(&url)
+            .query(&[("ids", icao), ("format", "json"), ("hours", "1")])
+            .send()
+            .await?;
+        let status = resp.status();
+        if !status.is_success() {
+            anyhow::bail!("metar error: {status}");
+        }
+
+        let items: Vec<MetarItem> = resp.json().await?;
+        let m = items.into_iter().next();
+        Ok(m.map(|item| MetarReport {
+            icao: icao.to_string(),
+            raw_ob: item.raw_ob,
+            temp_c: item.temp,
+            dewpoint_c: item.dewpoint,
+            wind_dir: item.wdir.map(|v| v as i32),
+            wind_speed_kt: item.wspd.map(|v| v as i32),
+            visibility_sm: item.visib,
+            flight_category: item.flight_category,
+            obs_time: item.obs_time,
+        }))
+    }
 }
 
 fn parse_sigmet(s: SigmetResponse) -> Option<HazardPolygon> {
@@ -79,4 +107,17 @@ fn parse_sigmet(s: SigmetResponse) -> Option<HazardPolygon> {
         max_ft: s.altitude_hi1,
         hazard_type,
     })
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct MetarItem {
+    raw_ob: Option<String>,
+    temp: Option<f64>,
+    dewpoint: Option<f64>,
+    wdir: Option<f64>,
+    wspd: Option<f64>,
+    visib: Option<f64>,
+    flight_category: Option<String>,
+    obs_time: Option<u64>,
 }

@@ -43,11 +43,14 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        radar: {
-          bg: "#05070a",
-          grid: "#12ffaa",
-          hazard: "#ff3358",
-          safe: "#f5d091",
+        hud: {
+          space: "#08080a",
+          charcoal: "#121315",
+          continent: "#1c1d21",
+          grid: "#39ff14",
+          warn: "#ff5f1f",
+          ink: "#b8c4cc",
+          dim: "#5a6770",
         },
       },
       borderRadius: {
@@ -56,21 +59,42 @@ export default {
         sm: "calc(var(--radius) - 4px)",
       },
       fontFamily: {
-        mono: ['ui-monospace', '"JetBrains Mono"', "monospace"],
+        mono: [
+          "ui-monospace",
+          '"JetBrains Mono"',
+          '"Roboto Mono"',
+          '"SF Mono"',
+          "monospace",
+        ],
       },
       keyframes: {
         "pulse-ring": {
-          "0%": { transform: "scale(0.8)", opacity: "0.8" },
-          "100%": { transform: "scale(2.2)", opacity: "0" },
+          "0%": { transform: "scale(0.6)", opacity: "0.85" },
+          "100%": { transform: "scale(2.4)", opacity: "0" },
         },
         "status-blink": {
           "0%, 100%": { opacity: "1" },
-          "50%": { opacity: "0.3" },
+          "50%": { opacity: "0.25" },
+        },
+        "reticle-spin": {
+          "0%": { transform: "rotate(0deg)" },
+          "100%": { transform: "rotate(360deg)" },
+        },
+        "target-blink": {
+          "0%, 49%": { opacity: "1" },
+          "50%, 100%": { opacity: "0.35" },
+        },
+        "scan-line": {
+          "0%": { transform: "translateY(-100%)" },
+          "100%": { transform: "translateY(100%)" },
         },
       },
       animation: {
-        "pulse-ring": "pulse-ring 1.6s ease-out infinite",
-        "status-blink": "status-blink 2s ease-in-out infinite",
+        "pulse-ring": "pulse-ring 2s ease-out infinite",
+        "status-blink": "status-blink 1.6s ease-in-out infinite",
+        "reticle-spin": "reticle-spin 6s linear infinite",
+        "target-blink": "target-blink 1s steps(1) infinite",
+        "scan-line": "scan-line 4s linear infinite",
       },
     },
   },

@@ -1,17 +1,20 @@
 import { Entity } from "resium";
-import { Cartesian3, Color, PolygonHierarchy, ColorMaterialProperty } from "cesium";
+import {
+  Cartesian3,
+  Color,
+  PolygonHierarchy,
+  ColorMaterialProperty,
+  HeightReference,
+  ArcType,
+} from "cesium";
 import type { HazardPolygon } from "@/types/domain";
 
 interface HazardLayerProps {
   sigmets: HazardPolygon[];
 }
 
-const HAZARD_COLOR = Color.fromCssColorString("#ff3358").withAlpha(0.18);
-const HAZARD_OUTLINE = Color.fromCssColorString("#ff3358").withAlpha(0.5);
-
-function ftToM(ft: number): number {
-  return ft * 0.3048;
-}
+const HAZARD_FILL = Color.fromCssColorString("#ff5f1f").withAlpha(0.12);
+const HAZARD_OUTLINE = Color.fromCssColorString("#ff5f1f").withAlpha(0.7);
 
 export function HazardLayer({ sigmets }: HazardLayerProps) {
   return (
@@ -26,21 +29,19 @@ export function HazardLayer({ sigmets }: HazardLayerProps) {
           Cartesian3.fromDegreesArray(coords),
         );
 
-        const minAlt = sig.min_ft ? ftToM(sig.min_ft) : 0;
-        const maxAlt = sig.max_ft ? ftToM(sig.max_ft) : 15000;
-
         return (
           <Entity
             key={sig.sigmet_id}
-            name={sig.hazard_type}
+            id={sig.sigmet_id}
+            name={`SIGMET ${sig.sigmet_id} (${sig.hazard_type})`}
             polygon={{
               hierarchy,
-              material: new ColorMaterialProperty(HAZARD_COLOR),
+              material: new ColorMaterialProperty(HAZARD_FILL),
               outline: true,
               outlineColor: HAZARD_OUTLINE,
-              extrudedHeight: maxAlt,
-              height: minAlt,
+              heightReference: HeightReference.CLAMP_TO_GROUND,
               fill: true,
+              arcType: ArcType.GEODESIC,
             }}
           />
         );

@@ -4,26 +4,26 @@
 
 @layer base {
   :root {
-    --background: 222 47% 3%;
-    --foreground: 160 30% 90%;
-    --card: 222 45% 5%;
-    --card-foreground: 160 30% 90%;
-    --popover: 222 45% 5%;
-    --popover-foreground: 160 30% 90%;
-    --primary: 159 100% 53%;
-    --primary-foreground: 222 47% 3%;
-    --secondary: 222 30% 12%;
-    --secondary-foreground: 160 30% 90%;
-    --muted: 222 30% 10%;
-    --muted-foreground: 160 15% 58%;
-    --accent: 190 80% 40%;
-    --accent-foreground: 160 30% 95%;
-    --destructive: 351 100% 60%;
-    --destructive-foreground: 160 30% 95%;
-    --border: 190 30% 16%;
-    --input: 190 30% 16%;
-    --ring: 159 100% 53%;
-    --radius: 0.5rem;
+    --background: 240 6% 4%;
+    --foreground: 140 6% 90%;
+    --card: 240 5% 7%;
+    --card-foreground: 140 6% 90%;
+    --popover: 240 5% 7%;
+    --popover-foreground: 140 6% 90%;
+    --primary: 110 100% 53%;
+    --primary-foreground: 240 6% 4%;
+    --secondary: 240 4% 11%;
+    --secondary-foreground: 140 6% 90%;
+    --muted: 240 4% 9%;
+    --muted-foreground: 140 4% 58%;
+    --accent: 16 100% 56%;
+    --accent-foreground: 240 6% 4%;
+    --destructive: 16 100% 56%;
+    --destructive-foreground: 240 6% 4%;
+    --border: 240 6% 16%;
+    --input: 240 6% 16%;
+    --ring: 110 100% 53%;
+    --radius: 0.125rem;
   }
 }
 
@@ -40,8 +40,10 @@
   body {
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
-    font-family: ui-monospace, "JetBrains Mono", monospace;
+    font-family: ui-monospace, "JetBrains Mono", "Roboto Mono", monospace;
     overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
   }
 }
 
@@ -51,30 +53,43 @@
     height: 100%;
     width: 100%;
   }
-  .cesium-container::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    z-index: 50;
-    background-image: repeating-linear-gradient(
-      0deg,
-      rgba(18, 255, 170, 0.04) 0px,
-      rgba(18, 255, 170, 0.04) 1px,
-      transparent 1px,
-      transparent 3px
-    );
-    mix-blend-mode: screen;
+
+  .starfield-bg {
+    background-color: #08080a;
+    background-image:
+      radial-gradient(1px 1px at 12% 18%, rgba(200, 220, 230, 0.55), transparent 60%),
+      radial-gradient(1px 1px at 27% 72%, rgba(180, 210, 225, 0.45), transparent 60%),
+      radial-gradient(1px 1px at 43% 33%, rgba(220, 230, 235, 0.5), transparent 60%),
+      radial-gradient(1px 1px at 58% 85%, rgba(170, 200, 220, 0.4), transparent 60%),
+      radial-gradient(1px 1px at 68% 12%, rgba(210, 225, 230, 0.45), transparent 60%),
+      radial-gradient(1px 1px at 81% 58%, rgba(190, 215, 225, 0.5), transparent 60%),
+      radial-gradient(1px 1px at 92% 88%, rgba(200, 220, 230, 0.4), transparent 60%),
+      radial-gradient(1px 1px at 5% 48%, rgba(180, 210, 225, 0.35), transparent 60%),
+      radial-gradient(1px 1px at 36% 95%, rgba(210, 225, 230, 0.4), transparent 60%),
+      radial-gradient(1px 1px at 74% 40%, rgba(190, 215, 225, 0.5), transparent 60%),
+      radial-gradient(2px 2px at 50% 25%, rgba(220, 235, 240, 0.3), transparent 50%),
+      radial-gradient(2px 2px at 22% 60%, rgba(210, 225, 235, 0.25), transparent 50%);
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
   }
+
   .radar-grid-bg {
     background-image:
-      linear-gradient(rgba(18, 255, 170, 0.05) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(18, 255, 170, 0.05) 1px, transparent 1px);
-    background-size: 32px 32px;
+      linear-gradient(rgba(57, 255, 20, 0.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(57, 255, 20, 0.035) 1px, transparent 1px),
+      linear-gradient(rgba(57, 255, 20, 0.015) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(57, 255, 20, 0.015) 1px, transparent 1px);
+    background-size: 96px 96px, 96px 96px, 24px 24px, 24px 24px;
+    background-position: -1px -1px;
   }
 }
 
 .cesium-viewer-bottom,
 .cesium-widget-credits {
   display: none !important;
+}
+
+.cesium-widget,
+.cesium-widget canvas {
+  background-color: #08080a !important;
 }
