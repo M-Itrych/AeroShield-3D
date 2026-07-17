@@ -7,6 +7,8 @@ use std::env;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
+    let _ = dotenvy::dotenv();
+
     tracing_subscriber::fmt()
         .with_env_filter(
             tracing_subscriber::EnvFilter::try_from_default_env()
@@ -16,12 +18,19 @@ async fn main() -> anyhow::Result<()> {
 
     let opensky_base =
         env::var("OPENSKY_BASE").unwrap_or_else(|_| "https://opensky-network.org/api".to_string());
-    let opensky_user = env::var("OPENSKY_USER").ok().filter(|s| !s.is_empty());
-    let opensky_pass = env::var("OPENSKY_PASS").ok().filter(|s| !s.is_empty());
+    let opensky_client_id = env::var("OPENSKY_CLIENT_ID").ok().filter(|s| !s.is_empty());
+    let opensky_client_secret = env::var("OPENSKY_CLIENT_SECRET")
+        .ok()
+        .filter(|s| !s.is_empty());
+    if opensky_client_id.is_none() || opensky_client_secret.is_none() {
+        tracing::warn!(
+            "OPENSKY_CLIENT_ID / OPENSKY_CLIENT_SECRET not set; running anonymous and will be rate limited"
+        );
+    }
     let aw_base = env::var("AVIATION_WEATHER_BASE")
         .unwrap_or_else(|_| "https://aviationweather.gov/api/data".to_string());
 
-    let opensky = OpenSkyClient::new(&opensky_base, opensky_user, opensky_pass);
+    let opensky = OpenSkyClient::new(&opensky_base, opensky_client_id, opensky_client_secret);
     let aviationweather = AviationWeatherClient::new(&aw_base);
     let airports = airports::load().await?;
 
