@@ -58,21 +58,75 @@ function altBandIntersectsFlight(
   return flightAltFt >= min && flightAltFt <= max;
 }
 
-function polygonOverlapsBbox(sig: HazardPolygon, b: BboxParams): boolean {
-  let hasOutside = false;
+interface Slab {
+  lomin: number;
+  lomax: number;
+  lamin: number;
+  lamax: number;
+}
+
+function bboxToSlabs(b: BboxParams): Slab[] {
+  if (b.lomin <= -180 && b.lomax >= 180) {
+    return [{ lomin: -180, lomax: 180, lamin: b.lamin, lamax: b.lamax }];
+  }
+  if (b.lomin > b.lomax) {
+    return [
+      { lomin: b.lomin, lomax: 180, lamin: b.lamin, lamax: b.lamax },
+      { lomin: -180, lomax: b.lomax, lamin: b.lamin, lamax: b.lamax },
+    ];
+  }
+  return [{ lomin: b.lomin, lomax: b.lomax, lamin: b.lamin, lamax: b.lamax }];
+}
+
+function rangesOverlap(aMin: number, aMax: number, bMin: number, bMax: number): boolean {
+  return aMax >= bMin && aMin <= bMax;
+}
+
+function polygonLonRange(points: [number, number][]) {
   let minLon = Infinity;
   let maxLon = -Infinity;
-  let minLat = Infinity;
-  let maxLat = -Infinity;
-  for (const [lon, lat] of sig.points) {
+  for (const [lon] of points) {
     if (lon < minLon) minLon = lon;
     if (lon > maxLon) maxLon = lon;
+  }
+  const crossesAntimeridian = maxLon - minLon > 180;
+  return {
+    crossesAntimeridian,
+    minLon,
+    maxLon,
+    rightLobe: [maxLon, 180] as const,
+    leftLobe: [-180, minLon] as const,
+  };
+}
+
+function polygonLatRange(points: [number, number][]) {
+  let minLat = Infinity;
+  let maxLat = -Infinity;
+  for (const [, lat] of points) {
     if (lat < minLat) minLat = lat;
     if (lat > maxLat) maxLat = lat;
   }
-  if (maxLon < b.lomin || minLon > b.lomax) hasOutside = true;
-  if (maxLat < b.lamin || minLat > b.lamax) hasOutside = true;
-  return !hasOutside;
+  return { minLat, maxLat };
+}
+
+function polygonOverlapsBbox(sig: HazardPolygon, b: BboxParams): boolean {
+  const slabs = bboxToSlabs(b);
+  const { minLat, maxLat } = polygonLatRange(sig.points);
+  const lr = polygonLonRange(sig.points);
+  for (const slab of slabs) {
+    if (!rangesOverlap(minLat, maxLat, slab.lamin, slab.lamax)) continue;
+    if (!lr.crossesAntimeridian) {
+      if (rangesOverlap(lr.minLon, lr.maxLon, slab.lomin, slab.lomax)) return true;
+    } else {
+      if (rangesOverlap(lr.rightLobe[0], lr.rightLobe[1], slab.lomin, slab.lomax)) {
+        return true;
+      }
+      if (rangesOverlap(lr.leftLobe[0], lr.leftLobe[1], slab.lomin, slab.lomax)) {
+        return true;
+      }
+    }
+  }
+  return false;
 }
 
 export const HazardLayer = memo(function HazardLayer({
