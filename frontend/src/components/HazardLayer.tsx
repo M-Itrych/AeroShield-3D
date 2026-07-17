@@ -109,6 +109,20 @@ function polygonLatRange(points: [number, number][]) {
   return { minLat, maxLat };
 }
 
+const MAX_VIEW_SPAN_DEG = 100;
+
+function viewportSpanDeg(b: BboxParams): number {
+  let lon = b.lomax - b.lomin;
+  if (b.lomin > b.lomax) lon = 360 - (b.lomin - b.lomax);
+  if (b.lomin <= -180 && b.lomax >= 180) lon = 360;
+  const lat = b.lamax - b.lamin;
+  return lon + lat;
+}
+
+function isZoomedOut(b: BboxParams): boolean {
+  return viewportSpanDeg(b) > MAX_VIEW_SPAN_DEG;
+}
+
 function polygonOverlapsBbox(sig: HazardPolygon, b: BboxParams): boolean {
   const slabs = bboxToSlabs(b);
   const { minLat, maxLat } = polygonLatRange(sig.points);
@@ -142,7 +156,10 @@ export const HazardLayer = memo(function HazardLayer({
     () =>
       sigmets
         .filter((sig) =>
-          viewportBbox ? polygonOverlapsBbox(sig, viewportBbox) : true,
+          viewportBbox
+            ? !isZoomedOut(viewportBbox) &&
+              polygonOverlapsBbox(sig, viewportBbox)
+            : true,
         )
         .map((sig) => {
         const coords: number[] = [];
